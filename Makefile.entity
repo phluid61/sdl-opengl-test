@@ -1,0 +1,10 @@
+target=entity.o
+
+CC=gcc
+CFLAGS=-O0 -Wall -pedantic
+
+.PHONY: default clean
+default: $(target)
+clean::
+	-rm $(target)
+

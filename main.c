@@ -8,14 +8,8 @@
 #include <time.h>
 #include <sys/time.h>
 
-static uint64_t time_now() {
-	struct timespec ts;
-	if (clock_gettime(CLOCK_REALTIME, &ts) == -1) {
-		fprintf(stderr, "unable to check realtime clock\n");
-		exit(-2);
-	}
-	return ((uint64_t)(ts.tv_sec) * UINT64_C(1000000000)) + (uint64_t)(ts.tv_nsec);
-}
+#include "engine.h"
+#include "entity.h"
 
 #define SCREEN_WIDTH   640
 #define SCREEN_HEIGHT  480
@@ -55,9 +49,9 @@ static GLfloat v7[] = {-1.0f,  1.0f, -1.0f};
 /* light position */
 static GLfloat l0[] = { 1.0f,  1.0f,  2.0f,  0.0f};
 
-static GLboolean animate = GL_TRUE;
-static float rot_y = 0.0f;
-static float rot_z = 0.0f;
+static Entity_t cube0;
+static Entity_t cube1;
+static Entity_t cube2;
 
 static void shutdown(int status) {
 	SDL_Quit();
@@ -69,15 +63,12 @@ static void on_keydown(SDL_Keysym *keysym) {
 	case SDLK_ESCAPE:
 		shutdown(0);
 		break;
-	case SDLK_SPACE:
-		animate = !animate;
-		break;
 	default:
 		break;
 	}
 }
 
-static void events() {
+static void handle_events() {
 	SDL_Event event;
 	SDL_KeyboardEvent *keyboard_event;
 
@@ -94,50 +85,12 @@ static void events() {
 	}
 }
 
-static void tick(uint64_t nanoseconds) {
-	/* ns / 10_000_000 = 100 degrees per second */
-	float increment = (float)nanoseconds / 10000000.0f;
-
-	if (animate) {
-		/* FIXME: tied to framerate */
-		rot_y += (increment);
-		if (rot_y >= 360.0f) {
-			rot_y -= 360.0f;
-		}
-
-		/*rot_z += (increment * 0.333333f);*/
-		rot_z += (increment / 3.1f);
-		if (rot_z >= 360.0f) {
-			rot_z -= 360.0f;
-		}
-	}
-}
-
-static void paint(SDL_Window *window) {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glMatrixMode(GL_MODELVIEW);
-
-	/* install lights */
-
+static void paint_box(Entity_t box) {
 	glLoadIdentity();
-
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
-
-	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.0f);
-	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 1.0f);
-	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 2.0f);
-	glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
-	glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
-	glLightfv(GL_LIGHT0, GL_POSITION, l0);
-
-	/* draw box */
-
-	glLoadIdentity();
-	glTranslatef(0.0, 0.0, -5.0);
-	glRotatef(rot_y, 0.0, 1.0, 0.0);
-	glRotatef(rot_z, 0.0, 0.0, 1.0);
+	glTranslatef(box.pos.x, box.pos.y, box.pos.z);
+	glRotatef(box.rot.y, 0.0, 1.0, 0.0);
+	glRotatef(box.rot.z, 0.0, 0.0, 1.0);
+	glRotatef(box.rot.z, 1.0, 0.0, 0.0);
 
 	glEnable(GL_COLOR_MATERIAL);
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
@@ -211,6 +164,32 @@ static void paint(SDL_Window *window) {
 	glVertex3fv(v5);
 
 	glEnd();
+}
+
+static void paint(SDL_Window *window) {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glMatrixMode(GL_MODELVIEW);
+
+	/* install lights */
+
+	glLoadIdentity();
+
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+
+	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.0f);
+	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 1.0f);
+	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 2.0f);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
+	glLightfv(GL_LIGHT0, GL_POSITION, l0);
+
+	/* draw boxes -- NB: back-to-front */
+
+	paint_box(cube2);
+	paint_box(cube1);
+	paint_box(cube0);
 
 	SDL_GL_SwapWindow(window);
 }
@@ -222,9 +201,6 @@ int main(int argc, char **argv) {
 
 	int width = SCREEN_WIDTH;
 	int height = SCREEN_HEIGHT;
-
-	uint64_t timestamp0;
-	uint64_t timestamp1;
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		fprintf(stderr, "Unable to initialize SDL: %s\n", SDL_GetError());
@@ -271,16 +247,23 @@ int main(int argc, char **argv) {
 	glLoadIdentity();
 	gluPerspective(60.0, (float)width / (float)height, 1.0, 1024.0);
 
-	/*glLightModel(GL_LIGHT_MODEL_AMBIENT, light_ambient);*/
+	/* set up engine, entities, etc. */
 
-	timestamp0 = time_now();
+	Entity__set3f(&cube0, ENTITY_POSITION,  0.0f, -0.5f, -5.0f);
+	Entity__set3f(&cube0, ENTITY_ROTATION,  0.0f,  0.0f,  0.0f);
+	Engine__register_entity(&cube0);
+
+	Entity__set3f(&cube1, ENTITY_POSITION, -4.5f,  0.0f, -9.0f);
+	Entity__set3f(&cube1, ENTITY_ROTATION,180.0f,180.0f,  0.0f);
+	Engine__register_entity(&cube1);
+
+	Entity__set3f(&cube2, ENTITY_POSITION,  6.0f,  0.5f,-12.0f);
+	Entity__set3f(&cube2, ENTITY_ROTATION,270.0f, 90.0f, 60.0f);
+	Engine__register_entity(&cube2);
+
 	for (;;) {
-		events();
-
-		timestamp1 = time_now();
-		tick(timestamp1 - timestamp0);
-		timestamp0 = timestamp1;
-
+		handle_events();
+		Engine__maybe_tick();
 		paint(window);
 	}
 
