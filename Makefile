@@ -7,7 +7,10 @@ CC=gcc
 CFLAGS:=$(shell pkg-config --cflags $(libraries)) $(CFLAGS)
 LDLIBS:=$(shell pkg-config --libs $(libraries)) $(LDLIBS)
 
-.PHONY: run clean
+.PHONY: default run clean
+
+default: $(exe)
+
 run: $(exe)
 	-./$<
 
