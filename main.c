@@ -361,7 +361,7 @@ int main(int argc, char **argv) {
 	SDL_DisplayMode   displaymode;
 
 	int i, j;
-	uint8_t optflags;
+	uint8_t optflags = UINT8_C(0);
 
 	scene_width = SCREEN_WIDTH;
 	scene_height = SCREEN_HEIGHT;
@@ -370,7 +370,11 @@ int main(int argc, char **argv) {
 		switch (i) {
 		case (int)'s':
 			if (parse_s(optarg) < 0) {
-				fprintf(stderr, "size parameter (-s) should be:\n  '#'    width (height is 3/4 of that)\n  '#x#'  width x height\n  '#p'    e.g. 1080p or 720p\n");
+				fprintf(stderr, "size parameter (-s) should be:\n");
+				fprintf(stderr, "  '#'    width (height is 3/4 of that)\n");
+				fprintf(stderr, "  '#x#'  width x height\n");
+				fprintf(stderr, "  '#p'    e.g. 1080p or 720p\n");
+				fprintf(stderr, "");
 				exit(-2);
 			}
 			optflags |= OPTFLAG_S;
