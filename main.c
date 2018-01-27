@@ -173,39 +173,45 @@ static void paint_box(Entity_t box) {
 	glPopMatrix();
 }
 
+static float paint_debug_char(char c, float x, float w, float y, float h) {
+	Text__use_texture(c);
+	glBegin(GL_QUADS);
+		glTexCoord2f(0.0f, 1.0f); glVertex3f(x,     y,     0.0f);
+		glTexCoord2f(1.0f, 1.0f); glVertex3f(x + w, y,     0.0f);
+		glTexCoord2f(1.0f, 0.0f); glVertex3f(x + w, y + h, 0.0f);
+		glTexCoord2f(0.0f, 0.0f); glVertex3f(x,     y + h, 0.0f);
+	glEnd();
+	return x - w;
+}
+
 static void paint_debug_fps(uint64_t fps) {
-	float w = (float)Text__font_width;
-	float h = (float)Text__font_height;
+	float w = 2.0f * (float)Text__font_width;
+	float h = 2.0f * (float)Text__font_height;
 	float x = w * 9;
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluOrtho2D(-0.0f, (float)scene_width, 0.0f, (float)scene_height);
 
-	glPushMatrix();
+	/*glPushMatrix();*/
 		glColor3f(0.0f, 0.0f, 0.0f);
 		glBegin(GL_QUADS);
-			glVertex3f(   0.0f, 0.0f, -1.0f);
-			glVertex3f(w*10.0f, 0.0f, -1.0f);
-			glVertex3f(w*10.0f,    h, -1.0f);
-			glVertex3f(   0.0f,    h, -1.0f);
+			glVertex3f(   0.0f, 0.0f, 0.0f);
+			glVertex3f(w*10.0f, 0.0f, 0.0f);
+			glVertex3f(w*10.0f,    h, 0.0f);
+			glVertex3f(   0.0f,    h, 0.0f);
 		glEnd();
 		glEnable(GL_TEXTURE_2D);
 			glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-			glColor3f(0.0f, 0.0f, 0.0f);
+			x = paint_debug_char('S', x, w, 0.0f, h);
+			x = paint_debug_char('P', x, w, 0.0f, h);
+			x = paint_debug_char('F', x, w, 0.0f, h);
 			while (fps > 0) {
-				Text__use_texture('0' + (char)(fps % 10));
-				glBegin(GL_QUADS);
-					glTexCoord2f(0.0f, 1.0f); glVertex3f(x,     0.0f, 0.0f);
-					glTexCoord2f(1.0f, 1.0f); glVertex3f(x + w, 0.0f, 0.0f);
-					glTexCoord2f(1.0f, 0.0f); glVertex3f(x + w, h,    0.0f);
-					glTexCoord2f(0.0f, 0.0f); glVertex3f(x,     h,    0.0f);
-				glEnd();
-				x -= w;
+				x = paint_debug_char('0' + (char)(fps % 10), x, w, 0.0f, h);
 				fps /= 10;
 			}
 		glDisable(GL_TEXTURE_2D);
-	glPopMatrix();
+	/*glPopMatrix();*/
 }
 
 static nanosecond_t last_paint_start = 0;
@@ -217,7 +223,7 @@ static void paint(SDL_Window *window) {
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(60.0, scene_ratio, 1.0, 1024.0);
+	gluPerspective(90.0, scene_ratio, 1.0, 1024.0);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
