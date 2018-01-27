@@ -8,10 +8,8 @@
 
 #include <stdint.h>
 
+#include "timing.h"
 #include "entity.h"
-
-typedef uint64_t nanosecond_t;
-#define NANOSECOND_C(v) UINT64_C(v)
 
 /* The time between ticks. */
 extern const nanosecond_t Engine__tick_rate;

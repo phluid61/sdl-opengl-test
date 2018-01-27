@@ -10,9 +10,15 @@
 
 #include "engine.h"
 #include "entity.h"
+#include "text.h"
+#include "timing.h"
 
 #define SCREEN_WIDTH   640
 #define SCREEN_HEIGHT  480
+
+static int scene_width;
+static int scene_height;
+static float scene_ratio;
 
 static GLubyte black[]         = {0x00, 0x00, 0x00, 0xFF};
 static GLubyte blue[]          = {0x00, 0x00, 0xAA, 0xFF};
@@ -86,11 +92,11 @@ static void handle_events() {
 }
 
 static void paint_box(Entity_t box) {
-	glLoadIdentity();
+	glPushMatrix();
 	glTranslatef(box.pos.x, box.pos.y, box.pos.z);
+	glRotatef(box.rot.x, 1.0, 0.0, 0.0);
 	glRotatef(box.rot.y, 0.0, 1.0, 0.0);
 	glRotatef(box.rot.z, 0.0, 0.0, 1.0);
-	glRotatef(box.rot.z, 1.0, 0.0, 0.0);
 
 	glEnable(GL_COLOR_MATERIAL);
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
@@ -164,9 +170,55 @@ static void paint_box(Entity_t box) {
 	glVertex3fv(v5);
 
 	glEnd();
+	glPopMatrix();
 }
 
+static void paint_debug_fps(uint64_t fps) {
+	float w = (float)Text__font_width;
+	float h = (float)Text__font_height;
+	float x = w * 9;
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluOrtho2D(-0.0f, (float)scene_width, 0.0f, (float)scene_height);
+
+	glPushMatrix();
+		glColor3f(0.0f, 0.0f, 0.0f);
+		glBegin(GL_QUADS);
+			glVertex3f(   0.0f, 0.0f, -1.0f);
+			glVertex3f(w*10.0f, 0.0f, -1.0f);
+			glVertex3f(w*10.0f,    h, -1.0f);
+			glVertex3f(   0.0f,    h, -1.0f);
+		glEnd();
+		glEnable(GL_TEXTURE_2D);
+			glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+			glColor3f(0.0f, 0.0f, 0.0f);
+			while (fps > 0) {
+				Text__use_texture('0' + (char)(fps % 10));
+				glBegin(GL_QUADS);
+					glTexCoord2f(0.0f, 1.0f); glVertex3f(x,     0.0f, 0.0f);
+					glTexCoord2f(1.0f, 1.0f); glVertex3f(x + w, 0.0f, 0.0f);
+					glTexCoord2f(1.0f, 0.0f); glVertex3f(x + w, h,    0.0f);
+					glTexCoord2f(0.0f, 0.0f); glVertex3f(x,     h,    0.0f);
+				glEnd();
+				x -= w;
+				fps /= 10;
+			}
+		glDisable(GL_TEXTURE_2D);
+	glPopMatrix();
+}
+
+static nanosecond_t last_paint_start = 0;
+static nanosecond_t this_paint_start;
 static void paint(SDL_Window *window) {
+	if (last_paint_start == 0)
+		last_paint_start = time_now();
+	this_paint_start = time_now();
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(60.0, scene_ratio, 1.0, 1024.0);
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
 
@@ -191,6 +243,13 @@ static void paint(SDL_Window *window) {
 	paint_box(cube1);
 	paint_box(cube0);
 
+	glDisable(GL_LIGHTING);
+
+	/*** draw overlay ***/
+
+	paint_debug_fps(NANOSECOND_C(1000000000) / (this_paint_start - last_paint_start));
+	last_paint_start = this_paint_start;
+
 	SDL_GL_SwapWindow(window);
 }
 
@@ -199,8 +258,9 @@ int main(int argc, char **argv) {
 	SDL_Renderer     *renderer = NULL;
 	SDL_RendererInfo  info;
 
-	int width = SCREEN_WIDTH;
-	int height = SCREEN_HEIGHT;
+	scene_width = SCREEN_WIDTH;
+	scene_height = SCREEN_HEIGHT;
+	scene_ratio = (float)scene_width / (float)scene_height;
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		fprintf(stderr, "Unable to initialize SDL: %s\n", SDL_GetError());
@@ -209,7 +269,7 @@ int main(int argc, char **argv) {
 
 	window = SDL_CreateWindow("SDL Test",
 				SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-				width, height,
+				scene_width, scene_height,
 				SDL_WINDOW_OPENGL);
 	if (window == NULL) {
 		fprintf(stderr, "Unable to create window: %s\n", SDL_GetError());
@@ -241,11 +301,9 @@ int main(int argc, char **argv) {
 
 	glClearColor(0, 0, 0, 0);
 
-	glViewport(0, 0, width, height);
+	glViewport(0, 0, scene_width, scene_height);
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(60.0, (float)width / (float)height, 1.0, 1024.0);
+	Text__generate_textures();
 
 	/* set up engine, entities, etc. */
 

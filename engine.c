@@ -6,12 +6,10 @@
 
 #include "engine.h"
 #include "entity.h"
+#include "timing.h"
 
 #include <stdlib.h>
 #include <stdio.h>
-
-#include <time.h>
-#include <sys/time.h>
 
 #define NEVER (nanosecond_t)(~0)
 
@@ -80,15 +78,6 @@ const nanosecond_t Engine__tick_rate = NANOSECOND_C(10000000);
 
 /* All logic happens when this procs */
 static void tick();
-
-static nanosecond_t time_now() {
-	struct timespec ts;
-	if (clock_gettime(CLOCK_REALTIME, &ts) == -1) {
-		fprintf(stderr, "unable to check realtime clock\n");
-		exit(-2);
-	}
-	return ((nanosecond_t)(ts.tv_sec) * UINT64_C(1000000000)) + (nanosecond_t)(ts.tv_nsec);
-}
 
 /* Defined in engine.h (visible outside) */
 void Engine__maybe_tick() {
