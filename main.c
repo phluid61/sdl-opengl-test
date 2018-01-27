@@ -8,6 +8,8 @@
 #include <time.h>
 #include <sys/time.h>
 
+#include <unistd.h>
+
 #include "engine.h"
 #include "entity.h"
 #include "text.h"
@@ -198,8 +200,8 @@ static void paint_debug_fps(uint64_t fps) {
 		glBegin(GL_QUADS);
 			glVertex3f(   0.0f, 0.0f, 0.0f);
 			glVertex3f(w*10.0f, 0.0f, 0.0f);
-			glVertex3f(w*10.0f,    h, 0.0f);
-			glVertex3f(   0.0f,    h, 0.0f);
+			glVertex3f(w*10.0f,  h+h, 0.0f);
+			glVertex3f(   0.0f,  h+h, 0.0f);
 		glEnd();
 		glEnable(GL_TEXTURE_2D);
 			glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
@@ -210,6 +212,20 @@ static void paint_debug_fps(uint64_t fps) {
 				x = paint_debug_char('0' + (char)(fps % 10), x, w, 0.0f, h);
 				fps /= 10;
 			}
+			/* begin HACK*/
+			x = w * 9;
+			fps = scene_height;
+			while (fps > 0) {
+				x = paint_debug_char('0' + (char)(fps % 10), x, w, h, h);
+				fps /= 10;
+			}
+			x = paint_debug_char('X', x, w, h, h);
+			fps = scene_width;
+			while (fps > 0) {
+				x = paint_debug_char('0' + (char)(fps % 10), x, w, h, h);
+				fps /= 10;
+			}
+			/* end HACK */
 		glDisable(GL_TEXTURE_2D);
 	/*glPopMatrix();*/
 }
@@ -259,24 +275,158 @@ static void paint(SDL_Window *window) {
 	SDL_GL_SwapWindow(window);
 }
 
+#define S_FLAG_D 0x01
+#define S_FLAG_X 0x02
+#define S_FLAG_P 0x04
+static int parse_s(const char *str) {
+	int64_t w = UINT64_C(0);
+	int64_t h = UINT64_C(0);
+	uint8_t flags;
+	char *ptr = str;
+	char c;
+
+	while ((c = *ptr) != (char)0) {
+		if (!flags) {
+			/* parsing first digit */
+			if (c >= '1' && c <= '9') {
+				w = (w * 10) + (int64_t)(c - '0');
+				flags |= S_FLAG_D;
+			} else {
+				return -1;
+			}
+		} else if (flags & S_FLAG_D) {
+			/* parsing rest of first number */
+			if (c >= '0' && c <= '9') {
+				w = (w * 10) + (int64_t)(c - '0');
+			} else if (c == 'p') {
+				flags |= S_FLAG_P;
+			} else if (c == 'x') {
+				flags &= ~((uint8_t)S_FLAG_D);
+				flags |= S_FLAG_X;
+			} else {
+				return -1;
+			}
+		} else if (flags & S_FLAG_P) {
+			/* was '#p', there should be nothing here! */
+			return -1;
+		} else if (flags & S_FLAG_X) {
+			/* was '#x', now reading height */
+			if ((flags & S_FLAG_D) == UINT8_C(0) && c >= '1' && c <= '9') {
+				h = (h * 10) + (int64_t)(c - '0');
+				flags |= S_FLAG_D;
+			} else if (c >= '0' && c <= '9') {
+				h = (h * 10) + (int64_t)(c - '0');
+			} else {
+				return -1;
+			}
+		} else {
+			/* ??? */
+			return -2;
+		}
+		ptr++;
+	}
+
+	if (flags & S_FLAG_P) {
+		/* gonna assume these are 16:9 */
+		scene_height = w;
+		scene_width = w * 16 / 9;
+	} else if (h == UINT64_C(0)) {
+		/* old-fashioned 4:3 */
+		scene_width = w;
+		scene_height = w * 3 / 4;
+	}
+
+	return 0;
+}
+
+static void show_help() {
+	fprintf(stderr, "Options:\n");
+	fprintf(stderr, "    -s <size>   '#' or '#x#' or '#p'\n");
+	fprintf(stderr, "    -f          fullscreen\n");
+	fprintf(stderr, "    -w          windowed (default)\n");
+	fprintf(stderr, "    -b          borderless window\n");
+}
+
+#define OPTFLAG_S  0x10
+#define OPTFLAG_F  0x01
+#define OPTFLAG_W  0x02
+#define OPTFLAG_B  0x04
+#define OPTFLAG_FW 0x03
+#define OPTFLAG_WB 0x06
+#define OPTFLAG_FS 0x11
 int main(int argc, char **argv) {
 	SDL_Window       *window   = NULL;
 	SDL_Renderer     *renderer = NULL;
 	SDL_RendererInfo  info;
+	SDL_DisplayMode   displaymode;
+
+	int i, j;
+	uint8_t optflags;
 
 	scene_width = SCREEN_WIDTH;
 	scene_height = SCREEN_HEIGHT;
-	scene_ratio = (float)scene_width / (float)scene_height;
+
+	while ((i = getopt(argc, argv, "+s:fwb?")) != -1) {
+		switch (i) {
+		case (int)'s':
+			if (parse_s(optarg) < 0) {
+				fprintf(stderr, "size parameter (-s) should be:\n  '#'    width (height is 3/4 of that)\n  '#x#'  width x height\n  '#p'    e.g. 1080p or 720p\n");
+				exit(-2);
+			}
+			optflags |= OPTFLAG_S;
+			break;
+		case (int)'f':
+			optflags |= OPTFLAG_F;
+			break;
+		case (int)'w':
+			optflags |= OPTFLAG_W;
+			break;
+		case (int)'b':
+			optflags |= OPTFLAG_WB;
+			break;
+		default:
+			show_help();
+			exit(-2);
+		}
+	}
+	if (optind < argc) {
+		fprintf(stderr, "unrecognised command-line options");
+		show_help();
+		exit(-2);
+	}
+	if ((optflags & OPTFLAG_FW) == OPTFLAG_FW) {
+		fprintf(stderr, "-f and -w/-b options are mutually exclusive\n");
+		exit(-2);
+	}
 
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		fprintf(stderr, "Unable to initialize SDL: %s\n", SDL_GetError());
 		exit(-1);
 	}
 
+	if ((optflags & OPTFLAG_FS) == OPTFLAG_F) {
+		/* FIXME: always display 0 */
+		/* FIXME: error? */
+		if (SDL_GetDesktopDisplayMode(0, &displaymode) == 0) {
+			scene_width = displaymode.w;
+			scene_height = displaymode.h;
+		}
+	}
+	scene_ratio = (float)scene_width / (float)scene_height;
+
+
 	window = SDL_CreateWindow("SDL Test",
 				SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 				scene_width, scene_height,
-				SDL_WINDOW_OPENGL);
+				SDL_WINDOW_OPENGL | (
+					(optflags & OPTFLAG_F)
+					? SDL_WINDOW_FULLSCREEN
+					: (
+						(optflags & OPTFLAG_B)
+						? SDL_WINDOW_BORDERLESS
+						: 0
+					)
+				));
 	if (window == NULL) {
 		fprintf(stderr, "Unable to create window: %s\n", SDL_GetError());
 		exit(-1);
