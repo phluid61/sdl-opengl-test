@@ -94,7 +94,7 @@ static void handle_events() {
 	}
 }
 
-static void paint_box(Entity_t box) {
+static void paint_box(Entity_t box, Texture_t texture) {
 	glPushMatrix();
 	glTranslatef(box.pos.x, box.pos.y, box.pos.z);
 	glRotatef(box.rot.x, 1.0, 0.0, 0.0);
@@ -107,7 +107,7 @@ static void paint_box(Entity_t box) {
 
 	glEnable(GL_TEXTURE_2D);
 		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		Texture__use_texture(TEXTURE_BOX);
+		Texture__use_texture(texture);
 		glBegin(GL_TRIANGLES);
 			glNormal3f( 0.0,  0.0,  1.0);
 
@@ -259,9 +259,9 @@ static void paint(SDL_Window *window) {
 
 	/* draw boxes -- NB: back-to-front */
 
-	paint_box(cube2);
-	paint_box(cube1);
-	paint_box(cube0);
+	paint_box(cube2, TEXTURE_STEELBOX);
+	paint_box(cube1, TEXTURE_CARDBOARDBOX);
+	paint_box(cube0, TEXTURE_BOX);
 
 	glDisable(GL_LIGHTING);
 
@@ -466,15 +466,15 @@ int main(int argc, char **argv) {
 
 	/* set up engine, entities, etc. */
 
-	Entity__set3f(&cube0, ENTITY_POSITION,  0.0f, -0.5f, -5.0f);
+	Entity__set3f(&cube0, ENTITY_POSITION,  0.0f,  0.0f, -4.0f);
 	Entity__set3f(&cube0, ENTITY_ROTATION,  0.0f,  0.0f,  0.0f);
 	Engine__register_entity(&cube0);
 
-	Entity__set3f(&cube1, ENTITY_POSITION, -4.5f,  0.0f, -9.0f);
+	Entity__set3f(&cube1, ENTITY_POSITION, -4.5f,  0.0f, -6.5f);
 	Entity__set3f(&cube1, ENTITY_ROTATION,180.0f,180.0f,  0.0f);
 	Engine__register_entity(&cube1);
 
-	Entity__set3f(&cube2, ENTITY_POSITION,  6.0f,  0.5f,-12.0f);
+	Entity__set3f(&cube2, ENTITY_POSITION,  5.5f,  0.0f, -7.5f);
 	Entity__set3f(&cube2, ENTITY_ROTATION,270.0f, 90.0f, 60.0f);
 	Engine__register_entity(&cube2);
 

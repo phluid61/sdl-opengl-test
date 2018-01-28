@@ -3,6 +3,8 @@
 
 typedef enum Texture {
 	TEXTURE_BOX = 0,
+	TEXTURE_STEELBOX,
+	TEXTURE_CARDBOARDBOX,
 
 	__NUM_TEXTURES__
 } Texture_t;
