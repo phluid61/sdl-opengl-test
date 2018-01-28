@@ -113,9 +113,11 @@ void Engine__register_entity(Entity_t *entity) {
 
 /* FIXME: 100% of physics are currently encapsulated in this single function */
 static void rotate(Entity_t *e) {
-	/* every tick (i.e. 100 times a second) rotate around y by 1 degree, and z by about a third of that */
+	/* every tick (i.e. 100 times a second) rotate around y by 1 degree,
+	 * z by about a third of that, and x by 1% of a degree. */
 	e->rot.y += 1.0f;
 	e->rot.z += (1.0f / 2.77f);
+	e->rot.x += (0.001f);
 }
 
 /*
