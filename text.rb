@@ -795,7 +795,7 @@ C
 
   use_code << "\tcase '#{char}':"
   use_code << "\t\tuse_texture(textures[#{num}]);"
-  use_code << "\t\treturn 1;"
+  use_code << "\t\treturn 0;"
 end
 
 puts <<C
