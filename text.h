@@ -11,3 +11,6 @@ void Text__generate_textures();
 int Text__use_texture(char c);
 
 #endif
+
+/* vim: ts=4 sts=4 sw=4
+ */
