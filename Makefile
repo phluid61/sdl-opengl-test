@@ -1,5 +1,5 @@
 exe=main
-objects=main engine entity text timing
+objects=main engine entity text texture timing
 libraries=sdl2 gl glu
 
 CC=gcc

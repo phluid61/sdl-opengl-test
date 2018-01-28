@@ -13,6 +13,7 @@
 #include "engine.h"
 #include "entity.h"
 #include "text.h"
+#include "texture.h"
 #include "timing.h"
 
 #define SCREEN_WIDTH   640
@@ -102,76 +103,73 @@ static void paint_box(Entity_t box) {
 
 	glEnable(GL_COLOR_MATERIAL);
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+	glColor4ubv(white);
 
-	glBegin(GL_TRIANGLES);
+	glEnable(GL_TEXTURE_2D);
+		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		Texture__use_texture(TEXTURE_BOX);
+		glBegin(GL_TRIANGLES);
+			glNormal3f( 0.0,  0.0,  1.0);
 
-	glColor4ubv(red);
-	glNormal3f( 0.0,  0.0,  1.0);
+			glTexCoord2f(0.0f, 0.0f); glVertex3fv(v0);
+			glTexCoord2f(0.0f, 1.0f); glVertex3fv(v1);
+			glTexCoord2f(1.0f, 1.0f); glVertex3fv(v2);
 
-	glVertex3fv(v0);
-	glVertex3fv(v1);
-	glVertex3fv(v2);
+			glTexCoord2f(0.0f, 0.0f); glVertex3fv(v0);
+			glTexCoord2f(1.0f, 1.0f); glVertex3fv(v2);
+			glTexCoord2f(1.0f, 0.0f); glVertex3fv(v3);
 
-	glVertex3fv(v0);
-	glVertex3fv(v2);
-	glVertex3fv(v3);
+			glNormal3f( 1.0,  0.0,  0.0);
 
-	glColor4ubv(magenta);
-	glNormal3f( 1.0,  0.0,  0.0);
+			glTexCoord2f(0.0f, 0.0f); glVertex3fv(v1);
+			glTexCoord2f(0.0f, 1.0f); glVertex3fv(v5);
+			glTexCoord2f(1.0f, 1.0f); glVertex3fv(v6);
 
-	glVertex3fv(v1);
-	glVertex3fv(v5);
-	glVertex3fv(v6);
+			glTexCoord2f(0.0f, 0.0f); glVertex3fv(v1);
+			glTexCoord2f(1.0f, 1.0f); glVertex3fv(v6);
+			glTexCoord2f(1.0f, 0.0f); glVertex3fv(v2);
 
-	glVertex3fv(v1);
-	glVertex3fv(v6);
-	glVertex3fv(v2);
+			glNormal3f( 0.0,  0.0, -1.0);
 
-	glColor4ubv(brown);
-	glNormal3f( 0.0,  0.0, -1.0);
+			glTexCoord2f(0.0f, 0.0f); glVertex3fv(v5);
+			glTexCoord2f(0.0f, 1.0f); glVertex3fv(v4);
+			glTexCoord2f(1.0f, 1.0f); glVertex3fv(v7);
 
-	glVertex3fv(v5);
-	glVertex3fv(v4);
-	glVertex3fv(v7);
+			glTexCoord2f(0.0f, 0.0f); glVertex3fv(v5);
+			glTexCoord2f(1.0f, 1.0f); glVertex3fv(v7);
+			glTexCoord2f(1.0f, 0.0f); glVertex3fv(v6);
 
-	glVertex3fv(v5);
-	glVertex3fv(v7);
-	glVertex3fv(v6);
+			glNormal3f(-1.0,  0.0,  0.0);
 
-	glColor4ubv(cyan);
-	glNormal3f(-1.0,  0.0,  0.0);
+			glTexCoord2f(0.0f, 0.0f); glVertex3fv(v4);
+			glTexCoord2f(0.0f, 1.0f); glVertex3fv(v0);
+			glTexCoord2f(1.0f, 1.0f); glVertex3fv(v3);
 
-	glVertex3fv(v4);
-	glVertex3fv(v0);
-	glVertex3fv(v3);
+			glTexCoord2f(0.0f, 0.0f); glVertex3fv(v4);
+			glTexCoord2f(1.0f, 1.0f); glVertex3fv(v3);
+			glTexCoord2f(1.0f, 0.0f); glVertex3fv(v7);
 
-	glVertex3fv(v4);
-	glVertex3fv(v3);
-	glVertex3fv(v7);
+			glNormal3f( 0.0,  1.0,  0.0);
 
-	glColor4ubv(green);
-	glNormal3f( 0.0,  1.0,  0.0);
+			glTexCoord2f(0.0f, 0.0f); glVertex3fv(v3);
+			glTexCoord2f(0.0f, 1.0f); glVertex3fv(v2);
+			glTexCoord2f(1.0f, 1.0f); glVertex3fv(v6);
 
-	glVertex3fv(v3);
-	glVertex3fv(v2);
-	glVertex3fv(v6);
+			glTexCoord2f(0.0f, 0.0f); glVertex3fv(v3);
+			glTexCoord2f(1.0f, 1.0f); glVertex3fv(v6);
+			glTexCoord2f(1.0f, 0.0f); glVertex3fv(v7);
 
-	glVertex3fv(v3);
-	glVertex3fv(v6);
-	glVertex3fv(v7);
+			glNormal3f( 0.0, -1.0,  0.0);
 
-	glColor4ubv(blue);
-	glNormal3f( 0.0, -1.0,  0.0);
+			glTexCoord2f(0.0f, 0.0f); glVertex3fv(v1);
+			glTexCoord2f(0.0f, 1.0f); glVertex3fv(v0);
+			glTexCoord2f(1.0f, 1.0f); glVertex3fv(v4);
 
-	glVertex3fv(v1);
-	glVertex3fv(v0);
-	glVertex3fv(v4);
-
-	glVertex3fv(v1);
-	glVertex3fv(v4);
-	glVertex3fv(v5);
-
-	glEnd();
+			glTexCoord2f(0.0f, 0.0f); glVertex3fv(v1);
+			glTexCoord2f(1.0f, 1.0f); glVertex3fv(v4);
+			glTexCoord2f(1.0f, 0.0f); glVertex3fv(v5);
+		glEnd();
+	glDisable(GL_TEXTURE_2D);
 	glPopMatrix();
 }
 
@@ -282,7 +280,7 @@ static int parse_s(const char *str) {
 	int64_t w = UINT64_C(0);
 	int64_t h = UINT64_C(0);
 	uint8_t flags;
-	char *ptr = str;
+	char *ptr = (char*)str;
 	char c;
 
 	while ((c = *ptr) != (char)0) {
@@ -360,7 +358,7 @@ int main(int argc, char **argv) {
 	SDL_RendererInfo  info;
 	SDL_DisplayMode   displaymode;
 
-	int i, j;
+	int i;
 	uint8_t optflags = UINT8_C(0);
 
 	scene_width = SCREEN_WIDTH;
@@ -374,7 +372,7 @@ int main(int argc, char **argv) {
 				fprintf(stderr, "  '#'    width (height is 3/4 of that)\n");
 				fprintf(stderr, "  '#x#'  width x height\n");
 				fprintf(stderr, "  '#p'    e.g. 1080p or 720p\n");
-				fprintf(stderr, "");
+				fprintf(stderr, "\n");
 				exit(-2);
 			}
 			optflags |= OPTFLAG_S;
@@ -464,6 +462,7 @@ int main(int argc, char **argv) {
 	glViewport(0, 0, scene_width, scene_height);
 
 	Text__generate_textures();
+	Texture__generate_textures();
 
 	/* set up engine, entities, etc. */
 
