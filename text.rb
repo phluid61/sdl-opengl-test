@@ -805,8 +805,7 @@ puts <<C
 #include "text.h"
 
 #include <stdint.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include <GL/glew.h>
 
 const uint64_t Text__font_width = UINT64_C(#{$width});
 const uint64_t Text__font_height = UINT64_C(#{$height});

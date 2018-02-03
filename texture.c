@@ -4,8 +4,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include <GL/glew.h>
 
 #include <unistd.h>
 #include <fcntl.h>

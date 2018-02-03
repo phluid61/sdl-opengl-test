@@ -1,5 +1,5 @@
-target=main.o
-libraries=sdl2 glew
+target=shader.o
+libraries=glew
 
 CC=gcc
 CFLAGS=-O0 -Wall -pedantic
