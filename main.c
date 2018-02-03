@@ -449,6 +449,10 @@ int main(int argc, char **argv) {
 		exit(-1);
 	}
 
+	fprintf(stdout, "OpenGL version %s\n", glGetString(GL_VERSION));
+	fprintf(stdout, "(%s/%s)\n", glGetString(GL_VENDOR), glGetString(GL_RENDERER));
+	fprintf(stdout, "Shader language %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+
 	/* set up OpenGL */
 
 	glShadeModel(GL_SMOOTH);
