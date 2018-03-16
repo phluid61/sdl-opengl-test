@@ -1,4 +1,6 @@
 exe=main
+#objects=main engine entity model shader text texture timing
+#libraries=sdl2 glew
 objects=main engine entity text texture timing
 libraries=sdl2 gl glu
 

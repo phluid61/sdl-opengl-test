@@ -1,3 +1,4 @@
+/*#include <GL/glew.h>*/
 #include <SDL.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
@@ -12,9 +13,14 @@
 
 #include "engine.h"
 #include "entity.h"
+/*#include "model.h"*/
+/*#include "shader.h"*/
 #include "text.h"
 #include "texture.h"
 #include "timing.h"
+
+/* 0=none, 1=version, 2=+extensions */
+#define DIAGNOSTICS 2
 
 #define SCREEN_WIDTH   640
 #define SCREEN_HEIGHT  480
@@ -345,6 +351,41 @@ static void show_help() {
 	fprintf(stderr, "    -b          borderless window\n");
 }
 
+#if DIAGNOSTICS
+static void show_opengl_info() {
+	GLubyte *str;
+	GLubyte *ptr;
+	uint8_t is_blank = 0;
+
+	fprintf(stderr, "OpenGL Version %s\n", glGetString(GL_VERSION));
+	fprintf(stderr, "(%s/%s)\n", glGetString(GL_VENDOR), glGetString(GL_RENDERER));
+	fprintf(stderr, "Shader language %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+#if DIAGNOSTICS > 1
+	fprintf(stderr, "Extensions:\n");
+	str = (GLubyte*)glGetString(GL_EXTENSIONS);
+	if (str != (GLubyte*)0) {
+		fprintf(stderr, "  ");
+		ptr = str;
+		while (*ptr != (GLubyte)0) {
+			if (*ptr == (GLubyte)' ') {
+				if (!is_blank) {
+					fprintf(stderr, "\n  ");
+					is_blank = 1;
+				}
+			} else {
+				fprintf(stderr, "%c", *ptr);
+				is_blank = 0;
+			}
+			ptr++;
+		}
+		fprintf(stderr, "\n");
+	}
+#endif
+}
+#else
+#define show_opengl_info() {}
+#endif
+
 #define OPTFLAG_S  0x10
 #define OPTFLAG_F  0x01
 #define OPTFLAG_W  0x02
@@ -360,6 +401,8 @@ int main(int argc, char **argv) {
 
 	int i;
 	uint8_t optflags = UINT8_C(0);
+
+/*	GLenum glew_err;*/
 
 	scene_width = SCREEN_WIDTH;
 	scene_height = SCREEN_HEIGHT;
@@ -416,7 +459,6 @@ int main(int argc, char **argv) {
 	}
 	scene_ratio = (float)scene_width / (float)scene_height;
 
-
 	window = SDL_CreateWindow("SDL Test",
 				SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 				scene_width, scene_height,
@@ -433,7 +475,13 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "Unable to create window: %s\n", SDL_GetError());
 		exit(-1);
 	}
-
+/*
+	glew_err = glewInit();
+	if (glew_err != GLEW_OK) {
+		fprintf(stderr, "Unable to initialize GLEW: %s\n", glewGetErrorString(glew_err));
+	}
+	fprintf(stderr, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
+*/
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 	if (renderer == NULL) {
 		fprintf(stderr, "Unable to create renderer: %s\n", SDL_GetError());
@@ -449,9 +497,9 @@ int main(int argc, char **argv) {
 		exit(-1);
 	}
 
-	fprintf(stdout, "OpenGL version %s\n", glGetString(GL_VERSION));
-	fprintf(stdout, "(%s/%s)\n", glGetString(GL_VENDOR), glGetString(GL_RENDERER));
-	fprintf(stdout, "Shader language %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+	/* diagnostics */
+
+	show_opengl_info();
 
 	/* set up OpenGL */
 
@@ -467,6 +515,8 @@ int main(int argc, char **argv) {
 
 	Text__generate_textures();
 	Texture__generate_textures();
+/*	Shader__generate_shaders();*/
+/*	Model__generate_models();*/
 
 	/* set up engine, entities, etc. */
 
