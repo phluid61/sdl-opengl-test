@@ -19,6 +19,9 @@
 #include "texture.h"
 #include "timing.h"
 
+/* 0=none, 1=version, 2=+extensions */
+#define DIAGNOSTICS 2
+
 #define SCREEN_WIDTH   640
 #define SCREEN_HEIGHT  480
 
@@ -348,6 +351,41 @@ static void show_help() {
 	fprintf(stderr, "    -b          borderless window\n");
 }
 
+#if DIAGNOSTICS
+static void show_opengl_info() {
+	GLubyte *str;
+	GLubyte *ptr;
+	uint8_t is_blank = 0;
+
+	fprintf(stderr, "OpenGL Version %s\n", glGetString(GL_VERSION));
+	fprintf(stderr, "(%s/%s)\n", glGetString(GL_VENDOR), glGetString(GL_RENDERER));
+	fprintf(stderr, "Shader language %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+#if DIAGNOSTICS > 1
+	fprintf(stderr, "Extensions:\n");
+	str = (GLubyte*)glGetString(GL_EXTENSIONS);
+	if (str != (GLubyte*)0) {
+		fprintf(stderr, "  ");
+		ptr = str;
+		while (*ptr != (GLubyte)0) {
+			if (*ptr == (GLubyte)' ') {
+				if (!is_blank) {
+					fprintf(stderr, "\n  ");
+					is_blank = 1;
+				}
+			} else {
+				fprintf(stderr, "%c", *ptr);
+				is_blank = 0;
+			}
+			ptr++;
+		}
+		fprintf(stderr, "\n");
+	}
+#endif
+}
+#else
+#define show_opengl_info() {}
+#endif
+
 #define OPTFLAG_S  0x10
 #define OPTFLAG_F  0x01
 #define OPTFLAG_W  0x02
@@ -458,6 +496,10 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "Unable to acquire hardware-accelerated renderer\n");
 		exit(-1);
 	}
+
+	/* diagnostics */
+
+	show_opengl_info();
 
 	/* set up OpenGL */
 
