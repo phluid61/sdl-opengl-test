@@ -4,7 +4,12 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include <GL/glew.h>
+#ifdef USE_GLEW
+#  include <GL/glew.h>
+#else
+#  include <GL/gl.h>
+#  include <GL/glu.h>
+#endif
 
 #include <unistd.h>
 #include <fcntl.h>

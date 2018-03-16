@@ -1,6 +1,11 @@
 #include "model.h"
 
-#include <GL/glew.h>
+#ifdef USE_GLEW
+#  include <GL/glew.h>
+#else
+#  include <GL/gl.h>
+#  include <GL/glu.h>
+#endif
 
 #define VERTEX_ATTRIB 0
 

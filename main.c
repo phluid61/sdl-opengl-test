@@ -1,7 +1,11 @@
-/*#include <GL/glew.h>*/
-#include <SDL.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
+#ifdef USE_GLEW
+#  include <GL/glew.h>
+#  include <SDL.h>
+#else
+#  include <SDL.h>
+#  include <GL/gl.h>
+#  include <GL/glu.h>
+#endif
 
 #include <stdio.h>
 #include <stdint.h>
@@ -20,7 +24,7 @@
 #include "timing.h"
 
 /* 0=none, 1=version, 2=+extensions */
-#define DIAGNOSTICS 2
+#define DIAGNOSTICS 1
 
 #define SCREEN_WIDTH   640
 #define SCREEN_HEIGHT  480
@@ -29,22 +33,22 @@ static int scene_width;
 static int scene_height;
 static float scene_ratio;
 
-static GLubyte black[]         = {0x00, 0x00, 0x00, 0xFF};
-static GLubyte blue[]          = {0x00, 0x00, 0xAA, 0xFF};
-static GLubyte green[]         = {0x00, 0xAA, 0x00, 0xFF};
-static GLubyte cyan[]          = {0x00, 0xAA, 0xAA, 0xFF};
-static GLubyte red[]           = {0xAA, 0x00, 0x00, 0xFF};
-static GLubyte magenta[]       = {0xAA, 0x00, 0xAA, 0xFF};
-static GLubyte brown[]         = {0xAA, 0x55, 0x00, 0xFF};
-static GLubyte light_gray[]    = {0xAA, 0xAA, 0xAA, 0xFF};
+/*static GLubyte black[]         = {0x00, 0x00, 0x00, 0xFF};*/
+/*static GLubyte blue[]          = {0x00, 0x00, 0xAA, 0xFF};*/
+/*static GLubyte green[]         = {0x00, 0xAA, 0x00, 0xFF};*/
+/*static GLubyte cyan[]          = {0x00, 0xAA, 0xAA, 0xFF};*/
+/*static GLubyte red[]           = {0xAA, 0x00, 0x00, 0xFF};*/
+/*static GLubyte magenta[]       = {0xAA, 0x00, 0xAA, 0xFF};*/
+/*static GLubyte brown[]         = {0xAA, 0x55, 0x00, 0xFF};*/
+/*static GLubyte light_gray[]    = {0xAA, 0xAA, 0xAA, 0xFF};*/
 
-static GLubyte gray[]          = {0x55, 0x55, 0x55, 0xFF};
-static GLubyte light_blue[]    = {0x55, 0x55, 0xFF, 0xFF};
-static GLubyte light_green[]   = {0x55, 0xFF, 0x55, 0xFF};
-static GLubyte light_cyan[]    = {0x55, 0xFF, 0xFF, 0xFF};
-static GLubyte light_red[]     = {0xFF, 0x55, 0x55, 0xFF};
-static GLubyte light_magenta[] = {0xFF, 0x55, 0xFF, 0xFF};
-static GLubyte yellow[]        = {0xFF, 0xFF, 0x55, 0xFF};
+/*static GLubyte gray[]          = {0x55, 0x55, 0x55, 0xFF};*/
+/*static GLubyte light_blue[]    = {0x55, 0x55, 0xFF, 0xFF};*/
+/*static GLubyte light_green[]   = {0x55, 0xFF, 0x55, 0xFF};*/
+/*static GLubyte light_cyan[]    = {0x55, 0xFF, 0xFF, 0xFF};*/
+/*static GLubyte light_red[]     = {0xFF, 0x55, 0x55, 0xFF};*/
+/*static GLubyte light_magenta[] = {0xFF, 0x55, 0xFF, 0xFF};*/
+/*static GLubyte yellow[]        = {0xFF, 0xFF, 0x55, 0xFF};*/
 static GLubyte white[]         = {0xFF, 0xFF, 0xFF, 0xFF};
 
 static GLfloat light_ambient[] = {0.01f, 0.01f, 0.02f, 1.0f};
@@ -353,14 +357,16 @@ static void show_help() {
 
 #if DIAGNOSTICS
 static void show_opengl_info() {
+#  if DIAGNOSTICS > 1
 	GLubyte *str;
 	GLubyte *ptr;
 	uint8_t is_blank = 0;
+#  endif
 
 	fprintf(stderr, "OpenGL Version %s\n", glGetString(GL_VERSION));
 	fprintf(stderr, "(%s/%s)\n", glGetString(GL_VENDOR), glGetString(GL_RENDERER));
 	fprintf(stderr, "Shader language %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
-#if DIAGNOSTICS > 1
+#  if DIAGNOSTICS > 1
 	fprintf(stderr, "Extensions:\n");
 	str = (GLubyte*)glGetString(GL_EXTENSIONS);
 	if (str != (GLubyte*)0) {
@@ -380,10 +386,10 @@ static void show_opengl_info() {
 		}
 		fprintf(stderr, "\n");
 	}
-#endif
+#  endif
 }
 #else
-#define show_opengl_info() {}
+#  define show_opengl_info() {}
 #endif
 
 #define OPTFLAG_S  0x10
@@ -402,7 +408,9 @@ int main(int argc, char **argv) {
 	int i;
 	uint8_t optflags = UINT8_C(0);
 
-/*	GLenum glew_err;*/
+#ifdef USE_GLEW
+	GLenum glew_err;
+#endif
 
 	scene_width = SCREEN_WIDTH;
 	scene_height = SCREEN_HEIGHT;
@@ -475,13 +483,15 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "Unable to create window: %s\n", SDL_GetError());
 		exit(-1);
 	}
-/*
+
+#ifdef USE_GLEW
 	glew_err = glewInit();
 	if (glew_err != GLEW_OK) {
 		fprintf(stderr, "Unable to initialize GLEW: %s\n", glewGetErrorString(glew_err));
 	}
 	fprintf(stderr, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
-*/
+#endif
+
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 	if (renderer == NULL) {
 		fprintf(stderr, "Unable to create renderer: %s\n", SDL_GetError());
