@@ -1,12 +1,13 @@
+CC=gcc
+CFLAGS=-O0 -Wall -pedantic -ggdb
+
 target=main.o
 ifdef USE_GLEW
-libraries=sdl2 glew
+ libraries=sdl2 glew
+ CFLAGS:=-DUSE_GLEW $(CFLAGS)
 else
-libraries=sdl2 gl glu
+ libraries=sdl2 gl glu
 endif
-
-CC=gcc
-CFLAGS=-O0 -Wall -pedantic
 
 CFLAGS:=$(shell pkg-config --cflags $(libraries)) $(CFLAGS)
 LDLIBS:=$(shell pkg-config --libs $(libraries)) $(LDLIBS)

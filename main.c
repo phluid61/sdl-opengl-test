@@ -17,7 +17,7 @@
 
 #include "engine.h"
 #include "entity.h"
-/*#include "model.h"*/
+#include "model.h"
 /*#include "shader.h"*/
 #include "text.h"
 #include "texture.h"
@@ -115,6 +115,13 @@ static void paint_box(Entity_t box, Texture_t texture) {
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 	glColor4ubv(white);
 
+#if 0
+	glEnable(GL_TEXTURE_2D);
+		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		Texture__use_texture(texture);
+		Model__paint_model(MODEL_CUBE);
+	glDisable(GL_TEXTURE_2D);
+#else
 	glEnable(GL_TEXTURE_2D);
 		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		Texture__use_texture(texture);
@@ -180,6 +187,7 @@ static void paint_box(Entity_t box, Texture_t texture) {
 			glTexCoord2f(1.0f, 0.0f); glVertex3fv(v5);
 		glEnd();
 	glDisable(GL_TEXTURE_2D);
+#endif
 	glPopMatrix();
 }
 
@@ -526,7 +534,7 @@ int main(int argc, char **argv) {
 	Text__generate_textures();
 	Texture__generate_textures();
 /*	Shader__generate_shaders();*/
-/*	Model__generate_models();*/
+	Model__generate_models();
 
 	/* set up engine, entities, etc. */
 
