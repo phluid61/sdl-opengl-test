@@ -1,5 +1,7 @@
-#include <GL/glew.h>
+/*#include <GL/glew.h>*/
 #include <SDL.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
 
 #include <stdio.h>
 #include <stdint.h>
@@ -11,8 +13,8 @@
 
 #include "engine.h"
 #include "entity.h"
-#include "model.h"
-#include "shader.h"
+/*#include "model.h"*/
+/*#include "shader.h"*/
 #include "text.h"
 #include "texture.h"
 #include "timing.h"
@@ -362,7 +364,7 @@ int main(int argc, char **argv) {
 	int i;
 	uint8_t optflags = UINT8_C(0);
 
-	GLenum glew_err;
+/*	GLenum glew_err;*/
 
 	scene_width = SCREEN_WIDTH;
 	scene_height = SCREEN_HEIGHT;
@@ -435,13 +437,13 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "Unable to create window: %s\n", SDL_GetError());
 		exit(-1);
 	}
-
+/*
 	glew_err = glewInit();
 	if (glew_err != GLEW_OK) {
 		fprintf(stderr, "Unable to initialize GLEW: %s\n", glewGetErrorString(glew_err));
 	}
 	fprintf(stderr, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
-
+*/
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 	if (renderer == NULL) {
 		fprintf(stderr, "Unable to create renderer: %s\n", SDL_GetError());
@@ -471,8 +473,8 @@ int main(int argc, char **argv) {
 
 	Text__generate_textures();
 	Texture__generate_textures();
-	Shader__generate_shaders();
-	Model__generate_models();
+/*	Shader__generate_shaders();*/
+/*	Model__generate_models();*/
 
 	/* set up engine, entities, etc. */
 
