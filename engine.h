@@ -7,6 +7,7 @@
 #define __ENGINE_H__
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "timing.h"
 #include "entity.h"
@@ -24,6 +25,16 @@ void Engine__maybe_tick();
  * Registers a single Entity in the engine.
  */
 void Engine__register_entity(Entity_t *entity);
+
+/**
+ * Suspends or resumes all animations and logic.
+ */
+void Engine__toggle_pause();
+
+/**
+ * Resumes animations and logic.
+ */
+bool Engine__paused();
 
 #endif
 

@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #include <time.h>
 #include <sys/time.h>
@@ -15,6 +16,7 @@
 #include "text.h"
 #include "texture.h"
 #include "timing.h"
+#include "flags.h"
 
 #define SCREEN_WIDTH   640
 #define SCREEN_HEIGHT  480
@@ -62,6 +64,10 @@ static Entity_t cube0;
 static Entity_t cube1;
 static Entity_t cube2;
 
+/* Runtime/debug flags */
+static flag_t runflags = FLAG_C(0);
+#define RUNFLAG_NOTEXTURES FLAG_C(0x1)
+
 static void shutdown(int status) {
 	SDL_Quit();
 	exit(status);
@@ -70,7 +76,14 @@ static void shutdown(int status) {
 static void on_keydown(SDL_Keysym *keysym) {
 	switch (keysym->sym) {
 	case SDLK_ESCAPE:
+	case SDLK_q:
 		shutdown(0);
+		break;
+	case SDLK_t:
+		FLAG_TOGGLE(runflags, RUNFLAG_NOTEXTURES);
+		break;
+	case SDLK_p:
+		Engine__toggle_pause();
 		break;
 	default:
 		break;
@@ -94,7 +107,7 @@ static void handle_events() {
 	}
 }
 
-static void paint_box(Entity_t box, Texture_t texture) {
+static void paint_box_texture(Entity_t box, Texture_t texture) {
 	glPushMatrix();
 	glTranslatef(box.pos.x, box.pos.y, box.pos.z);
 	glRotatef(box.rot.x, 1.0, 0.0, 0.0);
@@ -173,6 +186,81 @@ static void paint_box(Entity_t box, Texture_t texture) {
 	glPopMatrix();
 }
 
+static void paint_box_colour(Entity_t box, GLubyte *colour) {
+	glPushMatrix();
+	glTranslatef(box.pos.x, box.pos.y, box.pos.z);
+	glRotatef(box.rot.x, 1.0, 0.0, 0.0);
+	glRotatef(box.rot.y, 0.0, 1.0, 0.0);
+	glRotatef(box.rot.z, 0.0, 0.0, 1.0);
+
+	glEnable(GL_COLOR_MATERIAL);
+	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+	glColor4ubv(colour);
+
+	glBegin(GL_TRIANGLES);
+		glNormal3f( 0.0,  0.0,  1.0);
+
+		glVertex3fv(v0);
+		glVertex3fv(v1);
+		glVertex3fv(v2);
+
+		glVertex3fv(v0);
+		glVertex3fv(v2);
+		glVertex3fv(v3);
+
+		glNormal3f( 1.0,  0.0,  0.0);
+
+		glVertex3fv(v1);
+		glVertex3fv(v5);
+		glVertex3fv(v6);
+
+		glVertex3fv(v1);
+		glVertex3fv(v6);
+		glVertex3fv(v2);
+
+		glNormal3f( 0.0,  0.0, -1.0);
+
+		glVertex3fv(v5);
+		glVertex3fv(v4);
+		glVertex3fv(v7);
+
+		glVertex3fv(v5);
+		glVertex3fv(v7);
+		glVertex3fv(v6);
+
+		glNormal3f(-1.0,  0.0,  0.0);
+
+		glVertex3fv(v4);
+		glVertex3fv(v0);
+		glVertex3fv(v3);
+
+		glVertex3fv(v4);
+		glVertex3fv(v3);
+		glVertex3fv(v7);
+
+		glNormal3f( 0.0,  1.0,  0.0);
+
+		glVertex3fv(v3);
+		glVertex3fv(v2);
+		glVertex3fv(v6);
+
+		glVertex3fv(v3);
+		glVertex3fv(v6);
+		glVertex3fv(v7);
+
+		glNormal3f( 0.0, -1.0,  0.0);
+
+		glVertex3fv(v1);
+		glVertex3fv(v0);
+		glVertex3fv(v4);
+
+		glVertex3fv(v1);
+		glVertex3fv(v4);
+		glVertex3fv(v5);
+	glEnd();
+	glPopMatrix();
+}
+
 static float paint_debug_char(char c, float x, float w, float y, float h) {
 	Text__use_texture(c);
 	glBegin(GL_QUADS);
@@ -182,6 +270,15 @@ static float paint_debug_char(char c, float x, float w, float y, float h) {
 		glTexCoord2f(0.0f, 0.0f); glVertex3f(x,     y + h, 0.0f);
 	glEnd();
 	return x - w;
+}
+
+static float paint_debug_flag(bool flag_set, char c, float x, float w, float y, float h) {
+	if (flag_set) {
+		glColor4ubv(white);
+	} else {
+		glColor4ubv(gray);
+	}
+	return paint_debug_char(c, x, w, y, h);
 }
 
 static void paint_debug_fps(uint64_t fps) {
@@ -223,6 +320,19 @@ static void paint_debug_fps(uint64_t fps) {
 				x = paint_debug_char('0' + (char)(fps % 10), x, w, h, h);
 				fps /= 10;
 			}
+			/* end HACK, begin HACK2 */
+			glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+			glColor4ubv(light_gray);
+			x = w * 5;
+			x = paint_debug_char(':', x, w, h*3, h);
+			x = paint_debug_char('S', x, w, h*3, h);
+			x = paint_debug_char('G', x, w, h*3, h);
+			x = paint_debug_char('A', x, w, h*3, h);
+			x = paint_debug_char('L', x, w, h*3, h);
+			x = paint_debug_char('F', x, w, h*3, h);
+			x = w * 8;
+			x = paint_debug_flag(Engine__paused(), 'P', x, w, h*3, h);
+			x = paint_debug_flag(FLAG_TEST(runflags, RUNFLAG_NOTEXTURES), 'T', x, w, h*3, h);
 			/* end HACK */
 		glDisable(GL_TEXTURE_2D);
 	/*glPopMatrix();*/
@@ -259,9 +369,15 @@ static void paint(SDL_Window *window) {
 
 	/* draw boxes -- NB: back-to-front */
 
-	paint_box(cube2, TEXTURE_STEELBOX);
-	paint_box(cube1, TEXTURE_CARDBOARDBOX);
-	paint_box(cube0, TEXTURE_BOX);
+	if (FLAG_TEST(runflags, RUNFLAG_NOTEXTURES)) {
+		paint_box_colour(cube2, red);
+		paint_box_colour(cube1, blue);
+		paint_box_colour(cube0, green);
+	} else {
+		paint_box_texture(cube2, TEXTURE_STEELBOX);
+		paint_box_texture(cube1, TEXTURE_CARDBOARDBOX);
+		paint_box_texture(cube0, TEXTURE_BOX);
+	}
 
 	glDisable(GL_LIGHTING);
 
@@ -279,7 +395,7 @@ static void paint(SDL_Window *window) {
 static int parse_s(const char *str) {
 	int64_t w = UINT64_C(0);
 	int64_t h = UINT64_C(0);
-	uint8_t flags;
+	flag_t flags;
 	char *ptr = (char*)str;
 	char c;
 
@@ -288,30 +404,30 @@ static int parse_s(const char *str) {
 			/* parsing first digit */
 			if (c >= '1' && c <= '9') {
 				w = (w * 10) + (int64_t)(c - '0');
-				flags |= S_FLAG_D;
+				FLAG_SET(flags, S_FLAG_D);
 			} else {
 				return -1;
 			}
-		} else if (flags & S_FLAG_D) {
+		} else if (FLAG_TEST(flags, S_FLAG_D)) {
 			/* parsing rest of first number */
 			if (c >= '0' && c <= '9') {
 				w = (w * 10) + (int64_t)(c - '0');
 			} else if (c == 'p') {
-				flags |= S_FLAG_P;
+				FLAG_SET(flags, S_FLAG_P);
 			} else if (c == 'x') {
-				flags &= ~((uint8_t)S_FLAG_D);
-				flags |= S_FLAG_X;
+				FLAG_CLEAR(flags, S_FLAG_D);
+				FLAG_SET(flags, S_FLAG_X);
 			} else {
 				return -1;
 			}
-		} else if (flags & S_FLAG_P) {
+		} else if (FLAG_TEST(flags, S_FLAG_P)) {
 			/* was '#p', there should be nothing here! */
 			return -1;
-		} else if (flags & S_FLAG_X) {
+		} else if (FLAG_TEST(flags, S_FLAG_X)) {
 			/* was '#x', now reading height */
-			if ((flags & S_FLAG_D) == UINT8_C(0) && c >= '1' && c <= '9') {
+			if (FLAG_TEST_NONE(flags, S_FLAG_D) && c >= '1' && c <= '9') {
 				h = (h * 10) + (int64_t)(c - '0');
-				flags |= S_FLAG_D;
+				FLAG_SET(flags, S_FLAG_D);
 			} else if (c >= '0' && c <= '9') {
 				h = (h * 10) + (int64_t)(c - '0');
 			} else {
@@ -324,7 +440,7 @@ static int parse_s(const char *str) {
 		ptr++;
 	}
 
-	if (flags & S_FLAG_P) {
+	if (FLAG_TEST(flags, S_FLAG_P)) {
 		/* gonna assume these are 16:9 */
 		scene_height = w;
 		scene_width = w * 16 / 9;
@@ -359,7 +475,7 @@ int main(int argc, char **argv) {
 	SDL_DisplayMode   displaymode;
 
 	int i;
-	uint8_t optflags = UINT8_C(0);
+	flag_t optflags = FLAG_C(0);
 
 	scene_width = SCREEN_WIDTH;
 	scene_height = SCREEN_HEIGHT;
@@ -375,16 +491,16 @@ int main(int argc, char **argv) {
 				fprintf(stderr, "\n");
 				exit(-2);
 			}
-			optflags |= OPTFLAG_S;
+			FLAG_SET(optflags, OPTFLAG_S);
 			break;
 		case (int)'f':
-			optflags |= OPTFLAG_F;
+			FLAG_SET(optflags, OPTFLAG_F);
 			break;
 		case (int)'w':
-			optflags |= OPTFLAG_W;
+			FLAG_SET(optflags, OPTFLAG_W);
 			break;
 		case (int)'b':
-			optflags |= OPTFLAG_WB;
+			FLAG_SET(optflags, OPTFLAG_WB);
 			break;
 		default:
 			show_help();
@@ -396,7 +512,7 @@ int main(int argc, char **argv) {
 		show_help();
 		exit(-2);
 	}
-	if ((optflags & OPTFLAG_FW) == OPTFLAG_FW) {
+	if (FLAG_TEST_ALL(optflags, OPTFLAG_FW)) {
 		fprintf(stderr, "-f and -w/-b options are mutually exclusive\n");
 		exit(-2);
 	}
@@ -406,7 +522,7 @@ int main(int argc, char **argv) {
 		exit(-1);
 	}
 
-	if ((optflags & OPTFLAG_FS) == OPTFLAG_F) {
+	if (FLAG_TEST_MASK(optflags, OPTFLAG_FS, OPTFLAG_F)) {
 		/* FIXME: always display 0 */
 		/* FIXME: error? */
 		if (SDL_GetDesktopDisplayMode(0, &displaymode) == 0) {

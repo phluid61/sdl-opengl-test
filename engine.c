@@ -7,11 +7,15 @@
 #include "engine.h"
 #include "entity.h"
 #include "timing.h"
+#include "flags.h"
 
 #include <stdlib.h>
 #include <stdio.h>
 
 #define NEVER (nanosecond_t)(~0)
+
+static flag_t flags = FLAG_C(0);
+#define FLAG_PAUSE FLAG_C(0x1)
 
 typedef struct EntityList {
 	Entity_t *e;
@@ -103,12 +107,22 @@ void Engine__maybe_tick() {
 	 */
 
 proc:
-	tick();
+	if (FLAG_TEST_NONE(flags, FLAG_PAUSE)) {
+		tick();
+	}
 	last_tick = crnt;
 }
 
 void Engine__register_entity(Entity_t *entity) {
 	add_entity(entity);
+}
+
+void Engine__toggle_pause() {
+	FLAG_TOGGLE(flags, FLAG_PAUSE);
+}
+
+bool Engine__paused() {
+	return FLAG_TEST(flags, FLAG_PAUSE);
 }
 
 /* FIXME: 100% of physics are currently encapsulated in this single function */
