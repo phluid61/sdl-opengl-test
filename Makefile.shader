@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-O0 -Wall -pedantic
 
-target=texture.o
+target=shader.o
 ifdef USE_GLEW
  libraries=glew
  CFLAGS:=-DUSE_GLEW $(CFLAGS)

@@ -1,6 +1,12 @@
 exe=main
-objects=main engine entity text texture timing
-libraries=sdl2 gl glu
+#objects=main engine entity model shader text texture timing
+objects=main engine entity model text texture timing
+ifdef USE_GLEW
+ libraries=sdl2 glew
+ CFLAGS:=-DUSE_GLEW $(CFLAGS)
+else
+ libraries=sdl2 gl glu
+endif
 
 CC=gcc
 
