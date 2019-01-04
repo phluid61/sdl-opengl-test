@@ -36,15 +36,15 @@ static int scene_height;
 static float scene_ratio;
 
 /*static GLubyte black[]         = {0x00, 0x00, 0x00, 0xFF};*/
-/*static GLubyte blue[]          = {0x00, 0x00, 0xAA, 0xFF};*/
-/*static GLubyte green[]         = {0x00, 0xAA, 0x00, 0xFF};*/
+static GLubyte blue[]          = {0x00, 0x00, 0xAA, 0xFF};
+static GLubyte green[]         = {0x00, 0xAA, 0x00, 0xFF};
 /*static GLubyte cyan[]          = {0x00, 0xAA, 0xAA, 0xFF};*/
-/*static GLubyte red[]           = {0xAA, 0x00, 0x00, 0xFF};*/
+static GLubyte red[]           = {0xAA, 0x00, 0x00, 0xFF};
 /*static GLubyte magenta[]       = {0xAA, 0x00, 0xAA, 0xFF};*/
 /*static GLubyte brown[]         = {0xAA, 0x55, 0x00, 0xFF};*/
-/*static GLubyte light_gray[]    = {0xAA, 0xAA, 0xAA, 0xFF};*/
+static GLubyte light_gray[]    = {0xAA, 0xAA, 0xAA, 0xFF};
 
-/*static GLubyte gray[]          = {0x55, 0x55, 0x55, 0xFF};*/
+static GLubyte gray[]          = {0x55, 0x55, 0x55, 0xFF};
 /*static GLubyte light_blue[]    = {0x55, 0x55, 0xFF, 0xFF};*/
 /*static GLubyte light_green[]   = {0x55, 0xFF, 0x55, 0xFF};*/
 /*static GLubyte light_cyan[]    = {0x55, 0xFF, 0xFF, 0xFF};*/
@@ -76,7 +76,8 @@ static Entity_t cube2;
 
 /* Runtime/debug flags */
 static flag_t runflags = FLAG_C(0);
-#define RUNFLAG_NOTEXTURES FLAG_C(0x1)
+#define RUNFLAG_TEXTURES FLAG_C(0x1)
+#define RUNFLAG_LIGHTING FLAG_C(0x2)
 
 static void shutdown(int status) {
 	SDL_Quit();
@@ -90,7 +91,10 @@ static void on_keydown(SDL_Keysym *keysym) {
 		shutdown(0);
 		break;
 	case SDLK_t:
-		FLAG_TOGGLE(runflags, RUNFLAG_NOTEXTURES);
+		FLAG_TOGGLE(runflags, RUNFLAG_TEXTURES);
+		break;
+	case SDLK_l:
+		FLAG_TOGGLE(runflags, RUNFLAG_LIGHTING);
 		break;
 	case SDLK_p:
 		Engine__toggle_pause();
@@ -128,79 +132,11 @@ static void paint_box_texture(Entity_t box, Texture_t texture) {
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 	glColor4ubv(white);
 
-#if 0
 	glEnable(GL_TEXTURE_2D);
 		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		Texture__use_texture(texture);
 		Model__paint_model(MODEL_CUBE);
 	glDisable(GL_TEXTURE_2D);
-#else
-	glEnable(GL_TEXTURE_2D);
-		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		Texture__use_texture(texture);
-		glBegin(GL_TRIANGLES);
-			glNormal3f( 0.0,  0.0,  1.0);
-
-			glTexCoord2f(0.0f, 0.0f); glVertex3fv(v0);
-			glTexCoord2f(0.0f, 1.0f); glVertex3fv(v1);
-			glTexCoord2f(1.0f, 1.0f); glVertex3fv(v2);
-
-			glTexCoord2f(0.0f, 0.0f); glVertex3fv(v0);
-			glTexCoord2f(1.0f, 1.0f); glVertex3fv(v2);
-			glTexCoord2f(1.0f, 0.0f); glVertex3fv(v3);
-
-			glNormal3f( 1.0,  0.0,  0.0);
-
-			glTexCoord2f(0.0f, 0.0f); glVertex3fv(v1);
-			glTexCoord2f(0.0f, 1.0f); glVertex3fv(v5);
-			glTexCoord2f(1.0f, 1.0f); glVertex3fv(v6);
-
-			glTexCoord2f(0.0f, 0.0f); glVertex3fv(v1);
-			glTexCoord2f(1.0f, 1.0f); glVertex3fv(v6);
-			glTexCoord2f(1.0f, 0.0f); glVertex3fv(v2);
-
-			glNormal3f( 0.0,  0.0, -1.0);
-
-			glTexCoord2f(0.0f, 0.0f); glVertex3fv(v5);
-			glTexCoord2f(0.0f, 1.0f); glVertex3fv(v4);
-			glTexCoord2f(1.0f, 1.0f); glVertex3fv(v7);
-
-			glTexCoord2f(0.0f, 0.0f); glVertex3fv(v5);
-			glTexCoord2f(1.0f, 1.0f); glVertex3fv(v7);
-			glTexCoord2f(1.0f, 0.0f); glVertex3fv(v6);
-
-			glNormal3f(-1.0,  0.0,  0.0);
-
-			glTexCoord2f(0.0f, 0.0f); glVertex3fv(v4);
-			glTexCoord2f(0.0f, 1.0f); glVertex3fv(v0);
-			glTexCoord2f(1.0f, 1.0f); glVertex3fv(v3);
-
-			glTexCoord2f(0.0f, 0.0f); glVertex3fv(v4);
-			glTexCoord2f(1.0f, 1.0f); glVertex3fv(v3);
-			glTexCoord2f(1.0f, 0.0f); glVertex3fv(v7);
-
-			glNormal3f( 0.0,  1.0,  0.0);
-
-			glTexCoord2f(0.0f, 0.0f); glVertex3fv(v3);
-			glTexCoord2f(0.0f, 1.0f); glVertex3fv(v2);
-			glTexCoord2f(1.0f, 1.0f); glVertex3fv(v6);
-
-			glTexCoord2f(0.0f, 0.0f); glVertex3fv(v3);
-			glTexCoord2f(1.0f, 1.0f); glVertex3fv(v6);
-			glTexCoord2f(1.0f, 0.0f); glVertex3fv(v7);
-
-			glNormal3f( 0.0, -1.0,  0.0);
-
-			glTexCoord2f(0.0f, 0.0f); glVertex3fv(v1);
-			glTexCoord2f(0.0f, 1.0f); glVertex3fv(v0);
-			glTexCoord2f(1.0f, 1.0f); glVertex3fv(v4);
-
-			glTexCoord2f(0.0f, 0.0f); glVertex3fv(v1);
-			glTexCoord2f(1.0f, 1.0f); glVertex3fv(v4);
-			glTexCoord2f(1.0f, 0.0f); glVertex3fv(v5);
-		glEnd();
-	glDisable(GL_TEXTURE_2D);
-#endif
 	glPopMatrix();
 }
 
@@ -215,67 +151,7 @@ static void paint_box_colour(Entity_t box, GLubyte *colour) {
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 	glColor4ubv(colour);
 
-	glBegin(GL_TRIANGLES);
-		glNormal3f( 0.0,  0.0,  1.0);
-
-		glVertex3fv(v0);
-		glVertex3fv(v1);
-		glVertex3fv(v2);
-
-		glVertex3fv(v0);
-		glVertex3fv(v2);
-		glVertex3fv(v3);
-
-		glNormal3f( 1.0,  0.0,  0.0);
-
-		glVertex3fv(v1);
-		glVertex3fv(v5);
-		glVertex3fv(v6);
-
-		glVertex3fv(v1);
-		glVertex3fv(v6);
-		glVertex3fv(v2);
-
-		glNormal3f( 0.0,  0.0, -1.0);
-
-		glVertex3fv(v5);
-		glVertex3fv(v4);
-		glVertex3fv(v7);
-
-		glVertex3fv(v5);
-		glVertex3fv(v7);
-		glVertex3fv(v6);
-
-		glNormal3f(-1.0,  0.0,  0.0);
-
-		glVertex3fv(v4);
-		glVertex3fv(v0);
-		glVertex3fv(v3);
-
-		glVertex3fv(v4);
-		glVertex3fv(v3);
-		glVertex3fv(v7);
-
-		glNormal3f( 0.0,  1.0,  0.0);
-
-		glVertex3fv(v3);
-		glVertex3fv(v2);
-		glVertex3fv(v6);
-
-		glVertex3fv(v3);
-		glVertex3fv(v6);
-		glVertex3fv(v7);
-
-		glNormal3f( 0.0, -1.0,  0.0);
-
-		glVertex3fv(v1);
-		glVertex3fv(v0);
-		glVertex3fv(v4);
-
-		glVertex3fv(v1);
-		glVertex3fv(v4);
-		glVertex3fv(v5);
-	glEnd();
+	Model__paint_model(MODEL_CUBE);
 	glPopMatrix();
 }
 
@@ -348,9 +224,10 @@ static void paint_debug_fps(uint64_t fps) {
 			x = paint_debug_char('A', x, w, h*3, h);
 			x = paint_debug_char('L', x, w, h*3, h);
 			x = paint_debug_char('F', x, w, h*3, h);
-			x = w * 8;
+			x = w * 9;
 			x = paint_debug_flag(Engine__paused(), 'P', x, w, h*3, h);
-			x = paint_debug_flag(FLAG_TEST(runflags, RUNFLAG_NOTEXTURES), 'T', x, w, h*3, h);
+			x = paint_debug_flag(FLAG_TEST(runflags, RUNFLAG_LIGHTING), 'L', x, w, h*3, h);
+			x = paint_debug_flag(FLAG_TEST(runflags, RUNFLAG_TEXTURES), 'T', x, w, h*3, h);
 			/* end HACK */
 		glDisable(GL_TEXTURE_2D);
 	/*glPopMatrix();*/
@@ -374,30 +251,34 @@ static void paint(SDL_Window *window) {
 
 	glLoadIdentity();
 
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
+	if (FLAG_TEST(runflags, RUNFLAG_LIGHTING)) {
+		glEnable(GL_LIGHTING);
+		glEnable(GL_LIGHT0);
 
-	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.0f);
-	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 1.0f);
-	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 2.0f);
-	glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
-	glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
-	glLightfv(GL_LIGHT0, GL_POSITION, l0);
+		glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 0.0f);
+		glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 1.0f);
+		glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 2.0f);
+		glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
+		glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+		glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
+		glLightfv(GL_LIGHT0, GL_POSITION, l0);
+	}
 
 	/* draw boxes -- NB: back-to-front */
 
-	if (FLAG_TEST(runflags, RUNFLAG_NOTEXTURES)) {
-		paint_box_colour(cube2, red);
-		paint_box_colour(cube1, blue);
-		paint_box_colour(cube0, green);
-	} else {
+	if (FLAG_TEST(runflags, RUNFLAG_TEXTURES)) {
 		paint_box_texture(cube2, TEXTURE_STEELBOX);
 		paint_box_texture(cube1, TEXTURE_CARDBOARDBOX);
 		paint_box_texture(cube0, TEXTURE_BOX);
+	} else {
+		paint_box_colour(cube2, red);
+		paint_box_colour(cube1, blue);
+		paint_box_colour(cube0, green);
 	}
 
-	glDisable(GL_LIGHTING);
+	if (FLAG_TEST(runflags, RUNFLAG_LIGHTING)) {
+		glDisable(GL_LIGHTING);
+	}
 
 	/*** draw overlay ***/
 
@@ -665,6 +546,9 @@ int main(int argc, char **argv) {
 	Entity__set3f(&cube2, ENTITY_POSITION,  5.5f,  0.0f, -7.5f);
 	Entity__set3f(&cube2, ENTITY_ROTATION,270.0f, 90.0f, 60.0f);
 	Engine__register_entity(&cube2);
+
+	FLAG_SET(runflags, RUNFLAG_TEXTURES);
+	FLAG_SET(runflags, RUNFLAG_LIGHTING);
 
 	for (;;) {
 		handle_events();

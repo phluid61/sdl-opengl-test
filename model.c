@@ -7,6 +7,9 @@
 #  include <GL/glu.h>
 #endif
 
+/* if defined manually render all the points and stuff */
+#define MANUAL_RENDER
+
 #define VERTEX_ATTRIB 0
 #define NORMAL_ATTRIB 1
 #define TEXTURE_ATTRIB 2
@@ -14,67 +17,69 @@
 static const GLfloat vertices_cube[] = {
 	/* normal: 0,0,1 */
 	/*012,023*/
-	 0.0f,  0.0f,  1.0f,   0.0f, 0.0f,   -1.0f, -1.0f, 1.0f,
-	 0.0f,  0.0f,  1.0f,   0.0f, 1.0f,    1.0f, -1.0f, 1.0f,
-	 0.0f,  0.0f,  1.0f,   1.0f, 1.0f,    1.0f,  1.0f, 1.0f,
+	 0.0f, 0.0f,    0.0f,  0.0f,  1.0f,   -1.0f, -1.0f, 1.0f,
+	 0.0f, 1.0f,    0.0f,  0.0f,  1.0f,    1.0f, -1.0f, 1.0f,
+	 1.0f, 1.0f,    0.0f,  0.0f,  1.0f,    1.0f,  1.0f, 1.0f,
 
-	 0.0f,  0.0f,  1.0f,   0.0f, 0.0f,   -1.0f, -1.0f, 1.0f,
-	 0.0f,  0.0f,  1.0f,   1.0f, 1.0f,    1.0f,  1.0f, 1.0f,
-	 0.0f,  0.0f,  1.0f,   1.0f, 0.0f,   -1.0f,  1.0f, 1.0f,
+	 0.0f, 0.0f,    0.0f,  0.0f,  1.0f,   -1.0f, -1.0f, 1.0f,
+	 1.0f, 1.0f,    0.0f,  0.0f,  1.0f,    1.0f,  1.0f, 1.0f,
+	 1.0f, 0.0f,    0.0f,  0.0f,  1.0f,   -1.0f,  1.0f, 1.0f,
 
 	/* normal: 1,0,0 */
 	/*156,162*/
-	 1.0f,  0.0f,  0.0f,   0.0f, 0.0f,    1.0f, -1.0f,  1.0f,
-	 1.0f,  0.0f,  0.0f,   0.0f, 1.0f,    1.0f, -1.0f, -1.0f,
-	 1.0f,  0.0f,  0.0f,   1.0f, 1.0f,    1.0f,  1.0f, -1.0f,
+	 0.0f, 0.0f,    1.0f,  0.0f,  0.0f,    1.0f, -1.0f,  1.0f,
+	 0.0f, 1.0f,    1.0f,  0.0f,  0.0f,    1.0f, -1.0f, -1.0f,
+	 1.0f, 1.0f,    1.0f,  0.0f,  0.0f,    1.0f,  1.0f, -1.0f,
 
-	 1.0f,  0.0f,  0.0f,   0.0f, 0.0f,    1.0f, -1.0f,  1.0f,
-	 1.0f,  0.0f,  0.0f,   1.0f, 1.0f,    1.0f,  1.0f, -1.0f,
-	 1.0f,  0.0f,  0.0f,   1.0f, 0.0f,    1.0f,  1.0f,  1.0f,
+	 0.0f, 0.0f,    1.0f,  0.0f,  0.0f,    1.0f, -1.0f,  1.0f,
+	 1.0f, 1.0f,    1.0f,  0.0f,  0.0f,    1.0f,  1.0f, -1.0f,
+	 1.0f, 0.0f,    1.0f,  0.0f,  0.0f,    1.0f,  1.0f,  1.0f,
 
 	/* normal: 0,0,-1 */
 	/*547,576*/
-	 0.0f,  0.0f, -1.0f,   0.0f, 0.0f,    1.0f, -1.0f, -1.0f,
-	 0.0f,  0.0f, -1.0f,   0.0f, 1.0f,   -1.0f, -1.0f, -1.0f,
-	 0.0f,  0.0f, -1.0f,   1.0f, 1.0f,   -1.0f,  1.0f, -1.0f,
+	 0.0f, 0.0f,    0.0f,  0.0f, -1.0f,    1.0f, -1.0f, -1.0f,
+	 0.0f, 1.0f,    0.0f,  0.0f, -1.0f,   -1.0f, -1.0f, -1.0f,
+	 1.0f, 1.0f,    0.0f,  0.0f, -1.0f,   -1.0f,  1.0f, -1.0f,
 
-	 0.0f,  0.0f, -1.0f,   0.0f, 0.0f,    1.0f, -1.0f, -1.0f,
-	 0.0f,  0.0f, -1.0f,   1.0f, 1.0f,   -1.0f,  1.0f, -1.0f,
-	 0.0f,  0.0f, -1.0f,   1.0f, 0.0f,    1.0f,  1.0f, -1.0f,
+	 0.0f, 0.0f,    0.0f,  0.0f, -1.0f,    1.0f, -1.0f, -1.0f,
+	 1.0f, 1.0f,    0.0f,  0.0f, -1.0f,   -1.0f,  1.0f, -1.0f,
+	 1.0f, 0.0f,    0.0f,  0.0f, -1.0f,    1.0f,  1.0f, -1.0f,
 
 	/* normal: -1,0,0 */
 	/*403,437*/
-	-1.0f,  0.0f,  0.0f,   0.0f, 0.0f,   -1.0f, -1.0f, -1.0f,
-	-1.0f,  0.0f,  0.0f,   0.0f, 1.0f,   -1.0f, -1.0f,  1.0f,
-	-1.0f,  0.0f,  0.0f,   1.0f, 1.0f,   -1.0f,  1.0f,  1.0f,
+	 0.0f, 0.0f,   -1.0f,  0.0f,  0.0f,   -1.0f, -1.0f, -1.0f,
+	 0.0f, 1.0f,   -1.0f,  0.0f,  0.0f,   -1.0f, -1.0f,  1.0f,
+	 1.0f, 1.0f,   -1.0f,  0.0f,  0.0f,   -1.0f,  1.0f,  1.0f,
 
-	-1.0f,  0.0f,  0.0f,   0.0f, 0.0f,   -1.0f, -1.0f, -1.0f,
-	-1.0f,  0.0f,  0.0f,   1.0f, 1.0f,   -1.0f,  1.0f,  1.0f,
-	-1.0f,  0.0f,  0.0f,   1.0f, 0.0f,   -1.0f,  1.0f, -1.0f,
+	 0.0f, 0.0f,   -1.0f,  0.0f,  0.0f,   -1.0f, -1.0f, -1.0f,
+	 1.0f, 1.0f,   -1.0f,  0.0f,  0.0f,   -1.0f,  1.0f,  1.0f,
+	 1.0f, 0.0f,   -1.0f,  0.0f,  0.0f,   -1.0f,  1.0f, -1.0f,
 
 	/* normal: 0,1,0 */
 	/*326,367*/
-	 0.0f,  1.0f,  0.0f,   0.0f, 0.0f,   -1.0f,  1.0f,  1.0f,
-	 0.0f,  1.0f,  0.0f,   0.0f, 1.0f,    1.0f,  1.0f,  1.0f,
-	 0.0f,  1.0f,  0.0f,   1.0f, 1.0f,    1.0f,  1.0f, -1.0f,
+	 0.0f, 0.0f,    0.0f,  1.0f,  0.0f,   -1.0f,  1.0f,  1.0f,
+	 0.0f, 1.0f,    0.0f,  1.0f,  0.0f,    1.0f,  1.0f,  1.0f,
+	 1.0f, 1.0f,    0.0f,  1.0f,  0.0f,    1.0f,  1.0f, -1.0f,
 
-	 0.0f,  1.0f,  0.0f,   0.0f, 0.0f,   -1.0f,  1.0f,  1.0f,
-	 0.0f,  1.0f,  0.0f,   1.0f, 1.0f,    1.0f,  1.0f, -1.0f,
-	 0.0f,  1.0f,  0.0f,   1.0f, 0.0f,   -1.0f,  1.0f, -1.0f,
+	 0.0f, 0.0f,    0.0f,  1.0f,  0.0f,   -1.0f,  1.0f,  1.0f,
+	 1.0f, 1.0f,    0.0f,  1.0f,  0.0f,    1.0f,  1.0f, -1.0f,
+	 1.0f, 0.0f,    0.0f,  1.0f,  0.0f,   -1.0f,  1.0f, -1.0f,
 
 	/* normal: 0,-1,0 */
 	/*104,145*/
-	 0.0f, -1.0f,  0.0f,   0.0f, 0.0f,    1.0f, -1.0f,  1.0f,
-	 0.0f, -1.0f,  0.0f,   0.0f, 1.0f,   -1.0f, -1.0f,  1.0f,
-	 0.0f, -1.0f,  0.0f,   1.0f, 1.0f,   -1.0f, -1.0f, -1.0f,
+	 0.0f, 0.0f,    0.0f, -1.0f,  0.0f,    1.0f, -1.0f,  1.0f,
+	 0.0f, 1.0f,    0.0f, -1.0f,  0.0f,   -1.0f, -1.0f,  1.0f,
+	 1.0f, 1.0f,    0.0f, -1.0f,  0.0f,   -1.0f, -1.0f, -1.0f,
 
-	 0.0f, -1.0f,  0.0f,   0.0f, 0.0f,    1.0f, -1.0f,  1.0f,
-	 0.0f, -1.0f,  0.0f,   1.0f, 1.0f,   -1.0f, -1.0f, -1.0f,
-	 0.0f, -1.0f,  0.0f,   1.0f, 0.0f,    1.0f, -1.0f, -1.0f,
+	 0.0f, 0.0f,    0.0f, -1.0f,  0.0f,    1.0f, -1.0f,  1.0f,
+	 1.0f, 1.0f,    0.0f, -1.0f,  0.0f,   -1.0f, -1.0f, -1.0f,
+	 1.0f, 0.0f,    0.0f, -1.0f,  0.0f,    1.0f, -1.0f, -1.0f,
 };
 
+#ifndef MANUAL_RENDER
+
 static const GLint num_tris[] = {
-	36, /* cube */
+	12, /* cube */
 };
 
 static GLuint vertex_buffers[__NUM_MODELS__];
@@ -87,28 +92,67 @@ void Model__generate_models() {
 
 int Model__paint_model(Model_t model) {
 	if (model >= 0 && model < __NUM_MODELS__) {
-#if 0
-		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, vertex_buffers[model]);
-		/* FIXME: need to assign the attribs in the shaders */
-		glVertexAttribPointer(NORMAL_ATTRIB, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*5, (void*)0);
-		glVertexAttribPointer(TEXTURE_ATTRIB, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*6, (void*)3);
-		glVertexAttribPointer(VERTEX_ATTRIB, 3/*tri*/, GL_FLOAT, GL_FALSE/*normalise?*/, sizeof(GLfloat)*5/*stride*/, (void*)5/*offset*/);
-		glDrawArrays(GL_TRIANGLES, 0, num_tris[model]);
-		glDisableVertexAttribArray(0);
-#else
-		/*glEnableVertexAttribArray(0);*/
-		glBindBuffer(GL_ARRAY_BUFFER, vertex_buffers[model]);
-		glNormalPointer(GL_FLOAT, sizeof(GLfloat)*5, (GLvoid*)0);
-		glTexCoordPointer(2, GL_FLOAT, sizeof(GLfloat)*6, (GLvoid*)(sizeof(GLfloat)*3));
-		glVertexPointer(3, GL_FLOAT, sizeof(GLfloat)*5, (GLvoid*)(sizeof(GLfloat)*5));
-		glDrawArrays(GL_TRIANGLES, 0, num_tris[model]);
-		/*glDisableVertexAttribArray(0);*/
-#endif
+		glEnableClientState(GL_NORMAL_ARRAY);
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		glEnableClientState(GL_VERTEX_ARRAY);
+			glEnableVertexAttribArray( NORMAL_ATTRIB);
+			glEnableVertexAttribArray(TEXTURE_ATTRIB);
+			glEnableVertexAttribArray( VERTEX_ATTRIB);
+				glBindBuffer(GL_ARRAY_BUFFER, vertex_buffers[model]);
+#  if 1
+					/* FIXME: need to assign the attribs in the shaders */
+				glVertexAttribPointer(TEXTURE_ATTRIB, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*6, (void*)0);
+				glVertexAttribPointer( NORMAL_ATTRIB, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*5, (void*)(sizeof(GLfloat)*2));
+				glVertexAttribPointer( VERTEX_ATTRIB, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*5, (void*)(sizeof(GLfloat)*5));
+#  elif 0
+				glTexCoordPointer(2, GL_FLOAT, sizeof(GLfloat)*6, (GLvoid*)0);
+				glNormalPointer(     GL_FLOAT, sizeof(GLfloat)*5, (GLvoid*)(sizeof(GLfloat)*2));
+				glVertexPointer(  3, GL_FLOAT, sizeof(GLfloat)*5, (GLvoid*)(sizeof(GLfloat)*5));
+#  else
+				glInterleavedArrays(GL_T2F_N3F_V3F, 0, (void*)vertices_cube);
+#  endif
+				glDrawArrays(GL_TRIANGLES, 0, num_tris[model]);
+			glDisableVertexAttribArray( VERTEX_ATTRIB);
+			glDisableVertexAttribArray(TEXTURE_ATTRIB);
+			glDisableVertexAttribArray( NORMAL_ATTRIB);
+		glDisableClientState(GL_VERTEX_ARRAY);
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		glDisableClientState(GL_NORMAL_ARRAY);
 		return 0;
 	}
 	return -1;
 }
+
+#else
+
+static const GLint num_verts[] = {
+	36, /* cube */
+};
+
+static GLfloat* vertex_arrays[__NUM_MODELS__];
+
+void Model__generate_models() {
+	vertex_arrays[MODEL_CUBE] = (GLfloat*)vertices_cube;
+}
+
+int Model__paint_model(Model_t model) {
+	GLint n;
+	GLfloat *ptr;
+	if (model >= 0 && model < __NUM_MODELS__) {
+		glBegin(GL_TRIANGLES);
+		ptr = vertex_arrays[model];
+		for (n = num_verts[model]; n > 0; n--) {
+			glTexCoord2fv(ptr); ptr += 2;
+			glNormal3fv(ptr); ptr += 3;
+			glVertex3fv(ptr); ptr += 3;
+		}
+		glEnd();
+		return 0;
+	}
+	return -1;
+}
+
+#endif
 
 /* vim: ts=4 sts=4 sw=4
  */
