@@ -57,16 +57,6 @@ static GLfloat light_ambient[] = {0.01f, 0.01f, 0.02f, 1.0f};
 static GLfloat light_diffuse[] = {1.0f, 1.0f, 1.0f, 1.0f};
 static GLfloat light_specular[] = {0.0f, 0.0f, 0.0f, 1.0f};
 
-/* vertices of a 2-unit box around its origin */
-static GLfloat v0[] = {-1.0f, -1.0f,  1.0f};
-static GLfloat v1[] = { 1.0f, -1.0f,  1.0f};
-static GLfloat v2[] = { 1.0f,  1.0f,  1.0f};
-static GLfloat v3[] = {-1.0f,  1.0f,  1.0f};
-static GLfloat v4[] = {-1.0f, -1.0f, -1.0f};
-static GLfloat v5[] = { 1.0f, -1.0f, -1.0f};
-static GLfloat v6[] = { 1.0f,  1.0f, -1.0f};
-static GLfloat v7[] = {-1.0f,  1.0f, -1.0f};
-
 /* light position */
 static GLfloat l0[] = { 1.0f,  1.0f,  2.0f,  0.0f};
 
