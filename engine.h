@@ -6,7 +6,6 @@
 #ifndef __ENGINE_H__
 #define __ENGINE_H__
 
-#include <stdint.h>
 #include <stdbool.h>
 
 #include "timing.h"
