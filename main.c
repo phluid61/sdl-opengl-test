@@ -60,9 +60,9 @@ static GLfloat light_specular[] = {0.0f, 0.0f, 0.0f, 1.0f};
 /* light position */
 static GLfloat l0[] = { 1.0f,  1.0f,  2.0f,  0.0f};
 
-static Entity_t cube0;
-static Entity_t cube1;
-static Entity_t cube2;
+static Entity_t ent0;
+static Entity_t ent1;
+static Entity_t ent2;
 
 /* Runtime/debug flags */
 static flag_t runflags = FLAG_C(0);
@@ -115,7 +115,7 @@ static void handle_events() {
 	}
 }
 
-static void paint_box_texture(Entity_t box, Texture_t texture) {
+static void paint_entity_texture(Entity_t box, Texture_t texture) {
 	glPushMatrix();
 	glTranslatef(box.pos.x, box.pos.y, box.pos.z);
 	glRotatef(box.rot.x, 1.0, 0.0, 0.0);
@@ -138,7 +138,7 @@ static void paint_box_texture(Entity_t box, Texture_t texture) {
 	glPopMatrix();
 }
 
-static void paint_box_colour(Entity_t box, GLubyte *colour) {
+static void paint_entity_colour(Entity_t box, GLubyte *colour) {
 	glPushMatrix();
 	glTranslatef(box.pos.x, box.pos.y, box.pos.z);
 	glRotatef(box.rot.x, 1.0, 0.0, 0.0);
@@ -270,13 +270,13 @@ static void paint(SDL_Window *window) {
 	/* draw boxes -- NB: back-to-front */
 
 	if (FLAG_TEST(runflags, RUNFLAG_TEXTURES)) {
-		paint_box_texture(cube2, TEXTURE_STEELBOX);
-		paint_box_texture(cube1, TEXTURE_CARDBOARDBOX);
-		paint_box_texture(cube0, TEXTURE_BOX);
+		paint_entity_texture(ent2, TEXTURE_STEELBOX);
+		paint_entity_texture(ent1, TEXTURE_CARDBOARDBOX);
+		paint_entity_texture(ent0, TEXTURE_BOX);
 	} else {
-		paint_box_colour(cube2, red);
-		paint_box_colour(cube1, blue);
-		paint_box_colour(cube0, green);
+		paint_entity_colour(ent2, red);
+		paint_entity_colour(ent1, blue);
+		paint_entity_colour(ent0, green);
 	}
 
 	if (FLAG_TEST(runflags, RUNFLAG_LIGHTING)) {
@@ -538,17 +538,17 @@ int main(int argc, char **argv) {
 
 	/* set up engine, entities, etc. */
 
-	Entity__set3f(&cube0, ENTITY_POSITION,  0.0f,  0.0f, -4.0f);
-	Entity__set3f(&cube0, ENTITY_ROTATION,  0.0f,  0.0f,  0.0f);
-	Engine__register_entity(&cube0);
+	Entity__set3f(&ent0, ENTITY_POSITION,  0.0f,  0.0f, -4.0f);
+	Entity__set3f(&ent0, ENTITY_ROTATION,  0.0f,  0.0f,  0.0f);
+	Engine__register_entity(&ent0);
 
-	Entity__set3f(&cube1, ENTITY_POSITION, -4.5f,  0.0f, -6.5f);
-	Entity__set3f(&cube1, ENTITY_ROTATION,180.0f,180.0f,  0.0f);
-	Engine__register_entity(&cube1);
+	Entity__set3f(&ent1, ENTITY_POSITION, -4.5f,  0.0f, -6.5f);
+	Entity__set3f(&ent1, ENTITY_ROTATION,180.0f,180.0f,  0.0f);
+	Engine__register_entity(&ent1);
 
-	Entity__set3f(&cube2, ENTITY_POSITION,  5.5f,  0.0f, -7.5f);
-	Entity__set3f(&cube2, ENTITY_ROTATION,270.0f, 90.0f, 60.0f);
-	Engine__register_entity(&cube2);
+	Entity__set3f(&ent2, ENTITY_POSITION,  5.5f,  0.0f, -7.5f);
+	Entity__set3f(&ent2, ENTITY_ROTATION,270.0f, 90.0f, 60.0f);
+	Engine__register_entity(&ent2);
 
 	FLAG_SET(runflags, RUNFLAG_TEXTURES);
 	FLAG_SET(runflags, RUNFLAG_LIGHTING);
