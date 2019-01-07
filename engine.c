@@ -78,7 +78,7 @@ static void each_entity(void (*func)(Entity_t*)) {
 static nanosecond_t last_tick = NEVER;
 
 /* 1e7 = 100 ticks per second */
-const nanosecond_t Engine__tick_rate = NANOSECOND_C(10000000);
+const nanosecond_t Engine__TICK_RATE = NANOSECOND_C(10000000);
 
 /* All logic happens when this procs */
 static void tick();
@@ -93,7 +93,7 @@ void Engine__maybe_tick() {
 	}
 
 	/* Don't proc if it hasn't been a full cycle yet. */
-	if ((crnt - last_tick) < Engine__tick_rate) {
+	if ((crnt - last_tick) < Engine__TICK_RATE) {
 		return;
 	}
 
@@ -136,7 +136,7 @@ static void rotate(Entity_t *e) {
 
 /*
  * Only ever called from Engine__maybe_tick().
- * It's safe to assume it's been 'Engine__tick_rate' since last tick()
+ * It's safe to assume it's been 'Engine__TICK_RATE' since last tick()
  */
 static void tick() {
 	each_entity(rotate);
