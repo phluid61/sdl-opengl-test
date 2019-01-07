@@ -68,6 +68,7 @@ static Entity_t cube2;
 static flag_t runflags = FLAG_C(0);
 #define RUNFLAG_TEXTURES FLAG_C(0x1)
 #define RUNFLAG_LIGHTING FLAG_C(0x2)
+#define RUNFLAG_PYRAMIDS FLAG_C(0x4)
 
 static void shutdown(int status) {
 	SDL_Quit();
@@ -79,6 +80,9 @@ static void on_keydown(SDL_Keysym *keysym) {
 	case SDLK_ESCAPE:
 	case SDLK_q:
 		shutdown(0);
+		break;
+	case SDLK_s:
+		FLAG_TOGGLE(runflags, RUNFLAG_PYRAMIDS);
 		break;
 	case SDLK_t:
 		FLAG_TOGGLE(runflags, RUNFLAG_TEXTURES);
@@ -125,7 +129,11 @@ static void paint_box_texture(Entity_t box, Texture_t texture) {
 	glEnable(GL_TEXTURE_2D);
 		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		Texture__use_texture(texture);
-		Model__paint_model(MODEL_CUBE);
+		if (FLAG_TEST(runflags, RUNFLAG_PYRAMIDS)) {
+			Model__paint_model(MODEL_PYRAMID);
+		} else {
+			Model__paint_model(MODEL_CUBE);
+		}
 	glDisable(GL_TEXTURE_2D);
 	glPopMatrix();
 }
@@ -141,7 +149,11 @@ static void paint_box_colour(Entity_t box, GLubyte *colour) {
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 	glColor4ubv(colour);
 
-	Model__paint_model(MODEL_CUBE);
+	if (FLAG_TEST(runflags, RUNFLAG_PYRAMIDS)) {
+		Model__paint_model(MODEL_PYRAMID);
+	} else {
+		Model__paint_model(MODEL_CUBE);
+	}
 	glPopMatrix();
 }
 
@@ -214,8 +226,9 @@ static void paint_debug_fps(uint64_t fps) {
 			x = paint_debug_char('A', x, w, h*3, h);
 			x = paint_debug_char('L', x, w, h*3, h);
 			x = paint_debug_char('F', x, w, h*3, h);
-			x = w * 9;
+			x = w * 10;
 			x = paint_debug_flag(Engine__paused(), 'P', x, w, h*3, h);
+			x = paint_debug_flag(FLAG_TEST(runflags, RUNFLAG_PYRAMIDS), 'S', x, w, h*3, h);
 			x = paint_debug_flag(FLAG_TEST(runflags, RUNFLAG_LIGHTING), 'L', x, w, h*3, h);
 			x = paint_debug_flag(FLAG_TEST(runflags, RUNFLAG_TEXTURES), 'T', x, w, h*3, h);
 			/* end HACK */

@@ -2,7 +2,8 @@
 #define __MODEL_H__
 
 typedef enum Model {
-	MODEL_CUBE = 0,
+	MODEL_CUBE    = 0,
+	MODEL_PYRAMID = 1,
 
 	__NUM_MODELS__
 } Model_t;

@@ -76,8 +76,41 @@ static const GLfloat vertices_cube[] = {
 	 1.0f, 0.0f,    0.0f, -1.0f,  0.0f,    1.0f, -1.0f, -1.0f,
 };
 
+/* FIXME: face normals should angle up */
+static const GLfloat vertices_pyramid[] = {
+	/* front */
+	 0.5f, 1.0f,    0.0f,  0.0f,  1.0f,    0.0f,  1.0f,  0.0f,
+	 0.0f, 0.0f,    0.0f,  0.0f,  1.0f,   -1.0f, -1.0f,  1.0f,
+	 1.0f, 0.0f,    0.0f,  0.0f,  1.0f,    1.0f, -1.0f,  1.0f,
+
+	/* right */
+	 0.5f, 1.0f,    1.0f,  0.0f,  0.0f,    0.0f,  1.0f,  0.0f,
+	 0.0f, 0.0f,    1.0f,  0.0f,  0.0f,    1.0f, -1.0f,  1.0f,
+	 1.0f, 0.0f,    1.0f,  0.0f,  0.0f,    1.0f, -1.0f, -1.0f,
+
+	/* back */
+	 0.5f, 1.0f,    0.0f,  0.0f, -1.0f,    0.0f,  1.0f,  0.0f,
+	 0.0f, 0.0f,    0.0f,  0.0f, -1.0f,    1.0f, -1.0f, -1.0f,
+	 1.0f, 0.0f,    0.0f,  0.0f, -1.0f,   -1.0f, -1.0f, -1.0f,
+
+	/* left */
+	 0.5f, 1.0f,   -1.0f,  0.0f,  0.0f,    0.0f,  1.0f,  0.0f,
+	 0.0f, 0.0f,   -1.0f,  0.0f,  0.0f,   -1.0f, -1.0f, -1.0f,
+	 1.0f, 0.0f,   -1.0f,  0.0f,  0.0f,   -1.0f, -1.0f,  1.0f,
+
+	/* base */
+	 0.0f, 0.0f,    0.0f, -1.0f,  0.0f,    1.0f, -1.0f,  1.0f,
+	 0.0f, 1.0f,    0.0f, -1.0f,  0.0f,   -1.0f, -1.0f,  1.0f,
+	 1.0f, 1.0f,    0.0f, -1.0f,  0.0f,   -1.0f, -1.0f, -1.0f,
+
+	 0.0f, 0.0f,    0.0f, -1.0f,  0.0f,    1.0f, -1.0f,  1.0f,
+	 1.0f, 1.0f,    0.0f, -1.0f,  0.0f,   -1.0f, -1.0f, -1.0f,
+	 1.0f, 0.0f,    0.0f, -1.0f,  0.0f,    1.0f, -1.0f, -1.0f,
+};
+
 static const GLint num_verts[] = {
 	36, /* cube */
+	18, /* pyramid */
 };
 
 #ifndef MANUAL_RENDER
@@ -85,9 +118,13 @@ static const GLint num_verts[] = {
 static GLuint vertex_buffers[__NUM_MODELS__];
 
 void Model__generate_models() {
-	glGenBuffers(1, vertex_buffers);
+	glGenBuffers(2, vertex_buffers);
+
 	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffers[MODEL_CUBE]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_cube), vertices_cube, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffers[MODEL_PYRAMID]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_pyramid), vertices_pyramid, GL_STATIC_DRAW);
 }
 
 int Model__paint_model(Model_t model) {
@@ -129,7 +166,8 @@ int Model__paint_model(Model_t model) {
 static GLfloat* vertex_arrays[__NUM_MODELS__];
 
 void Model__generate_models() {
-	vertex_arrays[MODEL_CUBE] = (GLfloat*)vertices_cube;
+	vertex_arrays[MODEL_CUBE]    = (GLfloat*)vertices_cube;
+	vertex_arrays[MODEL_PYRAMID] = (GLfloat*)vertices_pyramid;
 }
 
 int Model__paint_model(Model_t model) {
