@@ -76,11 +76,11 @@ static const GLfloat vertices_cube[] = {
 	 1.0f, 0.0f,    0.0f, -1.0f,  0.0f,    1.0f, -1.0f, -1.0f,
 };
 
-#ifndef MANUAL_RENDER
-
-static const GLint num_tris[] = {
-	12, /* cube */
+static const GLint num_verts[] = {
+	36, /* cube */
 };
+
+#ifndef MANUAL_RENDER
 
 static GLuint vertex_buffers[__NUM_MODELS__];
 
@@ -98,20 +98,21 @@ int Model__paint_model(Model_t model) {
 			glEnableVertexAttribArray( NORMAL_ATTRIB);
 			glEnableVertexAttribArray(TEXTURE_ATTRIB);
 			glEnableVertexAttribArray( VERTEX_ATTRIB);
-				glBindBuffer(GL_ARRAY_BUFFER, vertex_buffers[model]);
 #  if 1
-					/* FIXME: need to assign the attribs in the shaders */
+				glBindBuffer(GL_ARRAY_BUFFER, vertex_buffers[model]);
+				/* FIXME: need to assign the attribs in the shaders */
 				glVertexAttribPointer(TEXTURE_ATTRIB, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*6, (void*)0);
 				glVertexAttribPointer( NORMAL_ATTRIB, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*5, (void*)(sizeof(GLfloat)*2));
 				glVertexAttribPointer( VERTEX_ATTRIB, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*5, (void*)(sizeof(GLfloat)*5));
 #  elif 0
+				glBindBuffer(GL_ARRAY_BUFFER, vertex_buffers[model]);
 				glTexCoordPointer(2, GL_FLOAT, sizeof(GLfloat)*6, (GLvoid*)0);
 				glNormalPointer(     GL_FLOAT, sizeof(GLfloat)*5, (GLvoid*)(sizeof(GLfloat)*2));
 				glVertexPointer(  3, GL_FLOAT, sizeof(GLfloat)*5, (GLvoid*)(sizeof(GLfloat)*5));
 #  else
 				glInterleavedArrays(GL_T2F_N3F_V3F, 0, (void*)vertices_cube);
 #  endif
-				glDrawArrays(GL_TRIANGLES, 0, num_tris[model]);
+				glDrawArrays(GL_TRIANGLES, 0, num_verts[model]);
 			glDisableVertexAttribArray( VERTEX_ATTRIB);
 			glDisableVertexAttribArray(TEXTURE_ATTRIB);
 			glDisableVertexAttribArray( NORMAL_ATTRIB);
@@ -124,10 +125,6 @@ int Model__paint_model(Model_t model) {
 }
 
 #else
-
-static const GLint num_verts[] = {
-	36, /* cube */
-};
 
 static GLfloat* vertex_arrays[__NUM_MODELS__];
 
