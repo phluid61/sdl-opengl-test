@@ -19,3 +19,5 @@ int Entity__set3f(Entity_t *e, EntityAttribute_t attr, float x, float y, float z
 	return 0;
 }
 
+/* vim: ts=4 sts=4 sw=4
+ */
