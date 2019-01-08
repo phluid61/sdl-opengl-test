@@ -1,11 +1,17 @@
 #ifndef __QOL_H__
 #define __QOL_H__
 
-/* Quality of Life macros and helpers */
+/**
+ * Quality of Life macros and helpers
+ */
 
+/** Expand argument list in-place. */
 #define __EVAL__(...) __VA_ARGS__
+
+/** Call a macro/function with the given args. */
 #define __CALL__(F, ...) F(__VA_ARGS__)
 
+/** Get the number of variadic arguments (1 to 9). */
 #define __VA_COUNT__(...) __CALL__(__VA_COUNTz_, __VA_ARGS__, 9, 8, 7, 6, 5, 4, 3, 2, 1)
 #define __VA_COUNTz_(_9, _8, _7, _6, _5, _4, _3, _2, _1, N_, ...) N_
 
@@ -17,9 +23,7 @@
 #define __VA_TAILz_(_X, ...) (__VA_ARGS__)
 */
 
-/**
- * Glue two tokens (or whatever) together.
- */
+/** Glue two tokens (or whatever) together. */
 #define __GLUE__(A, B) __GLUEz_(A, B)
 #define __GLUEz_(A, B) A##B
 
