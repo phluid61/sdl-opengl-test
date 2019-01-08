@@ -7,7 +7,7 @@
 #define __CALL__(F,...) F(__VA_ARGS__)
 
 #define __VA_COUNT__(...) __CALL__(__VA_COUNTz_,__VA_ARGS__,9,8,7,6,5,4,3,2,1)
-#define __VA_COUNTz_(_A,_9,_8,_7,_6,_5,_4,_3,_2,N_,...) N_
+#define __VA_COUNTz_(_9,_8,_7,_6,_5,_4,_3,_2,_1,N_,...) N_
 
 /*
 #define __VA_FIRST__(...) __CALL__(__VA_FIRSTz_,__VA_ARGS__)
