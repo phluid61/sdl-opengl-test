@@ -1,7 +1,7 @@
 #ifndef __QOL_H__
 #define __QOL_H__
 
-/* Quality of Life */
+/* Quality of Life macros and helpers */
 
 #define __EVAL__(...) __VA_ARGS__
 #define __CALL__(F, ...) F(__VA_ARGS__)
@@ -17,6 +17,9 @@
 #define __VA_TAILz_(_X, ...) (__VA_ARGS__)
 */
 
+/**
+ * Glue two tokens (or whatever) together.
+ */
 #define __GLUE__(A, B) __GLUEz_(A, B)
 #define __GLUEz_(A, B) A##B
 
@@ -30,6 +33,12 @@
 #define __VA_CAT8(X, ...) __GLUE__(X, __VA_CAT7(__VA_ARGS__))
 #define __VA_CAT9(X, ...) __GLUE__(X, __VA_CAT8(__VA_ARGS__))
 
+/**
+ * Concatenate a list of arguments together.
+ *
+ * For example:  __VA_CAT__(1,000,000)   =>  1000000
+ *
+ */
 #define __VA_CAT__(...) __CALL__(__GLUE__(__VA_CAT, __VA_COUNT__(__VA_ARGS__)), __VA_ARGS__)
 
 #endif
