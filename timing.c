@@ -18,7 +18,7 @@ nanosecond_t time_now() {
 		fprintf(stderr, "unable to check realtime clock\n");
 		exit(-2);
 	}
-	return ((nanosecond_t)(ts.tv_sec) * UINT64_C(1000000000)) + (nanosecond_t)(ts.tv_nsec);
+	return ((nanosecond_t)(ts.tv_sec) * NANOSECOND_C(1,000,000,000)) + (nanosecond_t)(ts.tv_nsec);
 }
 
 /* vim: ts=4 sts=4 sw=4

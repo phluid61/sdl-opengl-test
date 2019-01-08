@@ -285,7 +285,7 @@ static void paint(SDL_Window *window) {
 
 	/*** draw overlay ***/
 
-	paint_debug_fps(NANOSECOND_C(1000000000) / (this_paint_start - last_paint_start));
+	paint_debug_fps(NANOSECOND_C(1,000,000,000) / (this_paint_start - last_paint_start));
 	last_paint_start = this_paint_start;
 
 	SDL_GL_SwapWindow(window);

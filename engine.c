@@ -78,7 +78,7 @@ static void each_entity(void (*func)(Entity_t*)) {
 static nanosecond_t last_tick = NEVER;
 
 /* 1e7 = 100 ticks per second */
-const nanosecond_t Engine__TICK_RATE = NANOSECOND_C(10000000);
+const nanosecond_t Engine__TICK_RATE = NANOSECOND_C(10,000,000);
 
 /* All logic happens when this procs */
 static void tick();
