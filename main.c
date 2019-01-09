@@ -237,7 +237,7 @@ static void paint_debug_fps(uint64_t fps) {
 			debug_char = (uint8_t)((time_now() / NANOSECOND_C(500,000,000)) & 0xFF);
 			glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 			glColor4ubv(white);
-			x = w * 38;
+			x = scene_width - w;
 			x = paint_debug_char((debug_char       % 10) + '0', x, w, h*3, h);
 			x = paint_debug_char((debug_char /  10 % 10) + '0', x, w, h*3, h);
 			x = paint_debug_char((debug_char / 100 % 10) + '0', x, w, h*3, h);
