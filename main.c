@@ -177,6 +177,8 @@ static float paint_debug_flag(bool flag_set, char c, float x, float w, float y, 
 	return paint_debug_char(c, x, w, y, h);
 }
 
+static uint8_t debug_char = 0;
+
 static void paint_debug_fps(uint64_t fps) {
 	float w = 2.0f * (float)Text__font_width;
 	float h = 2.0f * (float)Text__font_height;
@@ -221,16 +223,26 @@ static void paint_debug_fps(uint64_t fps) {
 			glColor4ubv(light_gray);
 			x = w * 5;
 			x = paint_debug_char(':', x, w, h*3, h);
-			x = paint_debug_char('S', x, w, h*3, h);
-			x = paint_debug_char('G', x, w, h*3, h);
-			x = paint_debug_char('A', x, w, h*3, h);
-			x = paint_debug_char('L', x, w, h*3, h);
+			x = paint_debug_char('s', x, w, h*3, h);
+			x = paint_debug_char('g', x, w, h*3, h);
+			x = paint_debug_char('a', x, w, h*3, h);
+			x = paint_debug_char('l', x, w, h*3, h);
 			x = paint_debug_char('F', x, w, h*3, h);
 			x = w * 10;
 			x = paint_debug_flag(Engine__paused(), 'P', x, w, h*3, h);
 			x = paint_debug_flag(FLAG_TEST(runflags, RUNFLAG_PYRAMIDS), 'S', x, w, h*3, h);
 			x = paint_debug_flag(FLAG_TEST(runflags, RUNFLAG_LIGHTING), 'L', x, w, h*3, h);
 			x = paint_debug_flag(FLAG_TEST(runflags, RUNFLAG_TEXTURES), 'T', x, w, h*3, h);
+			/* end HACK2, begin HACK3 */
+			debug_char = (uint8_t)((time_now() / NANOSECOND_C(500,000,000)) & 0xFF);
+			glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+			glColor4ubv(white);
+			x = w * 38;
+			x = paint_debug_char((debug_char       % 10) + '0', x, w, h*3, h);
+			x = paint_debug_char((debug_char /  10 % 10) + '0', x, w, h*3, h);
+			x = paint_debug_char((debug_char / 100 % 10) + '0', x, w, h*3, h);
+			x -= w;
+			x = paint_debug_char(debug_char, x, w, h*3, h);
 			/* end HACK */
 		glDisable(GL_TEXTURE_2D);
 	/*glPopMatrix();*/
