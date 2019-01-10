@@ -168,6 +168,16 @@ static float paint_debug_char(char c, float x, float w, float y, float h) {
 	return x - w;
 }
 
+static float paint_debug_stringn(char *str, unsigned int n, float x, float w, float y, float h) {
+	char *ptr = (char*)(str + (sizeof(char) * n));
+	x += (w * (n - 1));
+	while (ptr != str) {
+		--ptr;
+		x = paint_debug_char(*ptr, x, w, y, h);
+	}
+	return x;
+}
+
 static float paint_debug_flag(bool flag_set, char c, float x, float w, float y, float h) {
 	if (flag_set) {
 		glColor4ubv(white);
@@ -198,9 +208,13 @@ static void paint_debug_fps(uint64_t fps) {
 		glEnd();
 		glEnable(GL_TEXTURE_2D);
 			glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+#if 1
+			x = paint_debug_stringn("FPS", 3, x - (w * 2), w, 0.0f, h);
+#else
 			x = paint_debug_char('S', x, w, 0.0f, h);
 			x = paint_debug_char('P', x, w, 0.0f, h);
 			x = paint_debug_char('F', x, w, 0.0f, h);
+#endif
 			while (fps > 0) {
 				x = paint_debug_char('0' + (char)(fps % 10), x, w, 0.0f, h);
 				fps /= 10;
